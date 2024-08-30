@@ -1,0 +1,52 @@
+﻿@page "/"
+@using AspireApp.ServiceDefaults.Models
+@using AspireApp.ServiceDefaults.Shared
+@using Newtonsoft.Json;
+
+@inject OrchestratorApiClient OrchestratorApi
+
+<PageTitle>Home</PageTitle>
+
+<h1>Home</h1>
+
+@if (response == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{    
+    <p><em>DerivedData: </em>[@deriveData.Name] / Count=@deriveData.PlotItems!.Count() </p>
+    <p><em>ProcessData: [@response2.Type] / @response2.Message</em></p>
+    <img src="@response2.Content" />
+}
+
+@if (!string.IsNullOrEmpty(image))
+{
+    <p>RunImage: @runImage.Name</p>
+    <img src="@image" />
+}
+
+@code {
+    private ActionResponse response, response2;
+    private DerivedData deriveData;
+    private RunImage runImage;
+    private string image = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        // getDerivedData:
+        response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined_NCP", TestType = "Combined_NCP" });
+        deriveData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(response.Content))!;
+
+        // processData:
+        response2 = await OrchestratorApi.processData(runImage);
+        Console.WriteLine($"API Response: [{response2.Type}] / {response2.Message} / {response2.Content}");
+       
+       /*
+        // getRunImage:
+        runImage = await OrchestratorApi.getRunImage(1);
+        image = UtilsForMessages.Decompress(runImage.Content);
+       */
+    }
+}

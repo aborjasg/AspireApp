@@ -1,0 +1,36 @@
+[
+  {
+    "Name": "Combined_NCP",
+    "Title": "Combined NCP",
+    "PictureDimensions": [ 640, 960 ],
+    "PictureLayout": [ 2, 4 ],
+    "PicturePreviewFlag": true,
+    "PicturePreviewPath": "C:\\Redlen\\Plots\\",
+    "StartPoint": [ 25, 50 ],
+    "PlotSpacing": [ 25, 35 ],
+    "PlotTemplates": [
+      {
+        "Name": "Combined_NCP",
+        "Title": "NCP",
+        "PlotType": "ncp",
+        "AreaLayout": "Squad",
+        "FrameSize": [ 288, 192 ],
+        "FrameSpace": [],
+        "StrokeWidth": 8,
+        "Axis": [
+          {
+            "Label": "X",
+            "Range": [ 0, 36, 6 ],
+            "Offset": [ 0, 0 ]
+          },
+          {
+            "Label": "Y",
+            "Range": [ 0, 24, 6 ],
+            "Offset": [ 0, 0 ]
+          }
+        ],
+        "Active": true
+      }
+    ]
+  }
+]
