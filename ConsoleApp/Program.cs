@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using AspireApp.ApiService.DataAccess;
+using AspireApp.Libraries;
 using AspireApp.ServiceDefaults.Models;
 using AspireApp.ServiceDefaults.Shared;
 using IdentityModel.OidcClient;
@@ -26,6 +27,7 @@ Console.WriteLine("Hello, World!");
 
 Utils.EventLog("Information", "Start Program...");
 
+/*
 string connectionString = ConfigurationManager.AppSettings.Get("ConnectionString.NpgsqlConnection")!;
 var obj = new TableAccess<RunImage>(connectionString);
 
@@ -57,11 +59,11 @@ using (var httpClient = new HttpClient())
 
 
 // Save record to DB:
-/*
-var record = new RunImage() { Metadata= "{\"Name\": \"Combined_NCP\"}", Image = content, CreatedDate = DateTime.Now };
-int result = obj.SaveRow(record);
-Utils.EventLog("Information", $"Row saved -> Result={result}");
-*/
+
+//var record = new RunImage() { Metadata= "{\"Name\": \"Combined_NCP\"}", Image = content, CreatedDate = DateTime.Now };
+//int result = obj.SaveRow(record);
+//Utils.EventLog("Information", $"Row saved -> Result={result}");
+
 
 // Read record from DB:
 
@@ -69,5 +71,8 @@ var id = 1;
 var row = obj.GetRow(id);
 Utils.EventLog("Information", $"Row Id={id} -> Got the record");
 Utils.EventLog("Information", $"Row Id={id} -> Serialized: {JsonConvert.SerializeObject(row)}");
+*/
+
+Calculations.Spline1dBuildLinear();
 
 Utils.EventLog("Information", "End of Program");
