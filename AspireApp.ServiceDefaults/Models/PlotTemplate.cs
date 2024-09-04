@@ -7,7 +7,7 @@ namespace AspireApp.ServiceDefaults.Models
         /// <summary>
         /// 
         /// </summary>
-        public int[] Index { get; set; } = new int[2]; // 0=X / 1=Y 
+        public int[] Index { get; set; } = []; // 0=X / 1=Y 
         /// <summary>
         /// 
         /// </summary>

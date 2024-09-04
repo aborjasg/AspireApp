@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using AspireApp.ServiceDefaults.Models;
+using SkiaSharp;
 using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -6,12 +7,12 @@ namespace AspireApp.ApiService.Controllers
 {
     public class PlotBase
     {
-        protected PictureEngine PictureEngine;
+        protected IPictureEngine PictureEngine;
 
         /// <summary>
         /// 
         /// </summary>
-        public PlotBase(PictureEngine pictureEngine)
+        public PlotBase(IPictureEngine pictureEngine)
         {
             PictureEngine = pictureEngine;
         }

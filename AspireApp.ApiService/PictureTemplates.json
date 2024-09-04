@@ -40,7 +40,7 @@
     "PictureLayout": [ 0, 0 ],
     "PicturePreviewFlag": true,
     "PicturePreviewPath": "C:\\Redlen\\Plots\\",
-    "StartPoint": [ 10, 10 ],
+    "StartPoint": [ 20, 20 ],
     "PlotSpacing": [ 10, 10 ],
     "PlotTemplates": [
       {
@@ -54,12 +54,12 @@
         "Axis": [
           {
             "Label": "X",
-            "Range": [],
+            "Range": [-10, 10, 1],
             "Offset": [ 0, 0 ]
           },
           {
             "Label": "Y",
-            "Range": [],
+            "Range": [-10, 10, 1],
             "Offset": [ 0, 0 ]
           }
         ],

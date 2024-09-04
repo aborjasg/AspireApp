@@ -5,12 +5,13 @@ using SkiaSharp;
 using System;
 using System.Drawing;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AspireApp.ApiService.Controllers
 {
-    public class PictureEngine
+    public class PictureEngine: IPictureEngine
     {
         #region Properties
 
@@ -95,11 +96,7 @@ namespace AspireApp.ApiService.Controllers
         /// 
         /// </summary>
         protected SKPaint PaintPoint { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public SKColor[]? Brushes { get; set; }
-
+        
         #endregion "Plot Objects"
 
         public PictureEngine(PictureTemplate pictureTemplate, DerivedData derivedData)
@@ -109,7 +106,7 @@ namespace AspireApp.ApiService.Controllers
             ImageInfo = new SKImageInfo(pictureTemplate.PictureDimensions[0], pictureTemplate.PictureDimensions[1]);
             Surface = SKSurface.Create(ImageInfo);
             Surface.Canvas.Clear(SKColors.White);
-
+            
             PaintTitle = new SKPaint()
             {
                 Color = SKColors.Black,
@@ -254,56 +251,101 @@ namespace AspireApp.ApiService.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="plotImage"></param>
-        protected void SetUpLayout(PlotTemplate plotImage)
+        protected double[][] GetScaledAxisValues(PlotTemplate plotTemplate)
+        {
+            var result = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
+
+            if (plotTemplate.Axis != null)
+            {
+                if (plotTemplate.Axis[0].Range != null && plotTemplate.Axis[0].Range.Length == 3)
+                {
+                    result[0] = plotTemplate.Axis[0].Range;
+                }
+                if (plotTemplate.Axis[1].Range != null && plotTemplate.Axis[1].Range.Length == 3)
+                {
+                    result[1] = plotTemplate.Axis[1].Range;
+                }
+            }
+            else
+            {
+                var arrX = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
+                var arrY = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
+                
+                // X axis:
+                int totalMaxJumps = 10;
+                var (minX, maxX, baseX) = DataTransformation.AdjustLimits(0, arrX.Length, totalMaxJumps, true);
+                result[0] = new double[] { minX, maxX, baseX };
+
+                // Y axis:
+                totalMaxJumps = 6;
+                var (minY, maxY, baseY) = DataTransformation.AdjustLimits(arrY.Min(), arrY.Max(), totalMaxJumps, true);
+                result[1] = new double[] { minY, maxY, baseY };
+            }
+            return result;
+        }
+
+        protected (float, float) GetPoint0(PlotTemplate plotTemplate)
+        {
+            float x = (float)(Math.Abs(plotTemplate.Axis[0].Range[0]) * plotTemplate.Axis[0].Scale);
+            float y = plotTemplate.FrameSize[1] - (float)(Math.Abs(plotTemplate.Axis[1].Range[0]) * plotTemplate.Axis[1].Scale);
+
+            return (x, y);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plotTemplate"></param>
+        protected void SetUpLayout(PlotTemplate plotTemplate)
         {
             // Set Frame Size:
-            if (plotImage.FrameSize.Length > 0)
+            if (plotTemplate.FrameSize.Length > 0)
             {
                 double rangeX = 0, rangeY = 0, width = 0, height = 0;
 
-                switch (plotImage.PlotType)
+                switch (plotTemplate.PlotType)
                 {                    
                     case enmPlotType.ncp:
                         {
                             // Get Scales:
-                            plotImage.FrameSize = new float[] { Constants.NUM_COLS * plotImage.StrokeWidth, Constants.NUM_ROWS * plotImage.StrokeWidth };
-                            PaintPoint.StrokeWidth = plotImage.StrokeWidth;             
-                            
-                            width = plotImage.FrameSize[0] - plotImage.Axis[0].Offset[0] - plotImage.Axis[0].Offset[1];
-                            height = plotImage.FrameSize[1] - plotImage.Axis[1].Offset[0] - plotImage.Axis[1].Offset[1];
-                            
-                            AxisValues = new double[][] { plotImage.Axis[0].Range, plotImage.Axis[1].Range };
-                            rangeX = AxisValues[0][1] - AxisValues[0][0];
-                            rangeY = AxisValues[1][1] - AxisValues[1][0];
-                            
+                            plotTemplate.FrameSize = new float[] { Constants.NUM_COLS * plotTemplate.StrokeWidth, Constants.NUM_ROWS * plotTemplate.StrokeWidth };
+                            PaintPoint.StrokeWidth = plotTemplate.StrokeWidth;             
+                                                        
                             break;
                         }
                     case enmPlotType.linechart:
                         {
-                            var range = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
-                            
-                            plotImage.Axis[0].Range = new double[] { range[0], range[range.Length - 1], 1 };
-                            range = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
-                            plotImage.Axis[1].Range = new double[] { range[0], range[range.Length - 1], 1 };
+                            if (plotTemplate.Axis[0].Range == null || plotTemplate.Axis[0].Range.Length == 0)
+                            {
+                                var range = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
+                                plotTemplate.Axis[0].Range = new double[] { range[0], range[range.Length - 1], 1 };
+                            }
 
-                            AxisValues = new double[][] { plotImage.Axis[0].Range, plotImage.Axis[1].Range };
-                            rangeX = AxisValues[0][1] - AxisValues[0][0];
-                            rangeY = AxisValues[1][1] - AxisValues[1][0];
-
+                            if (plotTemplate.Axis[1].Range == null || plotTemplate.Axis[1].Range.Length == 0)
+                            {
+                                var range = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
+                                plotTemplate.Axis[1].Range = new double[] { range[0], range[range.Length - 1], 1 };
+                            }
                             break;
                         }
                 }
 
+                AxisValues = GetScaledAxisValues(plotTemplate);
+                rangeX = AxisValues[0][1] - AxisValues[0][0];
+                rangeY = AxisValues[1][1] - AxisValues[1][0];
+
+                width = plotTemplate.FrameSize[0] - plotTemplate.Axis[0].Offset[0] - plotTemplate.Axis[0].Offset[1];
+                height = plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0] - plotTemplate.Axis[1].Offset[1];
+
                 if (rangeX != 0)
-                    plotImage.Axis[0].Scale = width / rangeX;
+                    plotTemplate.Axis[0].Scale = width / rangeX;
                 else
-                    plotImage.Axis[0].Scale = 1;
+                    plotTemplate.Axis[0].Scale = 1;
 
                 if (rangeY != 0)
-                    plotImage.Axis[1].Scale = height / rangeY;
+                    plotTemplate.Axis[1].Scale = height / rangeY;
                 else
-                    plotImage.Axis[1].Scale = 1;
+                    plotTemplate.Axis[1].Scale = 1;
             }
         }
 
@@ -313,9 +355,9 @@ namespace AspireApp.ApiService.Controllers
         /// <param name="areaType"></param>
         /// <param name="point"></param>
         /// <param name="PlotTemplate"></param>
-        protected void DrawLayout(PlotTemplate plotImage, SKPoint point)
+        protected void DrawLayout(PlotTemplate plotTemplate, SKPoint point)
         {
-            SetUpLayout(plotImage);
+            SetUpLayout(plotTemplate);
 
             var paintSquare = new SKPaint()
             {
@@ -329,11 +371,11 @@ namespace AspireApp.ApiService.Controllers
                 PathEffect = SKPathEffect.CreateDash(new float[] { 1, 1 }, 2)
             };
 
-            switch (plotImage.AreaLayout)
+            switch (plotTemplate.AreaLayout)
             {
                 case enmAreaLayout.Plain:
                     {
-                        float x0 = (float)point.X, x1 = point.X + plotImage.FrameSize[0], y0 = point.Y, y1 = point.Y - plotImage.FrameSize[1];
+                        float x0 = (float)point.X, x1 = point.X + plotTemplate.FrameSize[0], y0 = point.Y, y1 = point.Y - plotTemplate.FrameSize[1];
                                                                        
                         Surface.Canvas.DrawLine(new SKPoint(x0, y0), new SKPoint(x0, y1), paintSquare);
                         Surface.Canvas.DrawLine(new SKPoint(x0, y0), new SKPoint(x1, y0), paintSquare);
@@ -344,8 +386,8 @@ namespace AspireApp.ApiService.Controllers
                     }
                 case enmAreaLayout.Squad:
                     {
-                        float x0 = (float)point.X, x1 = point.X + plotImage.FrameSize[0], y0 = point.Y, y1 = point.Y + plotImage.FrameSize[1];
-                        float space = plotImage.StrokeWidth;
+                        float x0 = (float)point.X, x1 = point.X + plotTemplate.FrameSize[0], y0 = point.Y - plotTemplate.FrameSize[1], y1 = point.Y;
+                        float space = plotTemplate.StrokeWidth;
 
                         // Dotted-line matrix:
                         for (float k = x0; k <= x1; k += space)
@@ -370,9 +412,8 @@ namespace AspireApp.ApiService.Controllers
                         }
                         break;
                     }                
-            }
-            DrawPlotTitle(plotImage, point, $" [{plotImage.Index[0]}/{plotImage.Index[1]}]");
-            DrawAxis(plotImage, point);
+            }            
+            DrawAxis(plotTemplate, point);
         }
 
         /// <summary>
@@ -404,7 +445,7 @@ namespace AspireApp.ApiService.Controllers
                 // X Axis:
                 paint.TextAlign = SKTextAlign.Center;
 
-                for (double k = AxisValues[0][0]; k < AxisValues[0][1]; k += AxisValues[0][2])
+                for (double k = AxisValues[0][0]; k <= AxisValues[0][1]; k += AxisValues[0][2])
                 {
                     var (x, y) = ((float)(point.X + plotTemplate.Axis[0].Offset[0] + (k - AxisValues[0][0]) * plotTemplate.Axis[0].Scale), point.Y);
                     var pointRef = new SKPoint(x, y);
@@ -416,9 +457,9 @@ namespace AspireApp.ApiService.Controllers
                 // Y Axis:
                 paint.TextAlign = SKTextAlign.Right;
 
-                for (double k = AxisValues[1][0]; k < AxisValues[1][1]; k += AxisValues[1][2])
+                for (double k = AxisValues[1][0]; k <= AxisValues[1][1]; k += AxisValues[1][2])
                 {
-                    var (x, y) = (point.X, (float)(point.Y + plotTemplate.Axis[1].Offset[0] + (k - AxisValues[1][0]) * plotTemplate.Axis[1].Scale));
+                    var (x, y) = (point.X, (float)(point.Y - (plotTemplate.Axis[1].Offset[0] + (k - AxisValues[1][0]) * plotTemplate.Axis[1].Scale)));
                     var pointRef = new SKPoint(x, y);
 
                     Surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X - 5, pointRef.Y), PaintBorder);
@@ -431,6 +472,11 @@ namespace AspireApp.ApiService.Controllers
         {
             if (plotItem.ArrayData != null)
             {
+                var (x, y) = GetPoint0(plotTemplate);
+                SKPoint pointRef = new SKPoint(x, y);
+                SKBitmap bitmap = new SKBitmap((int)plotTemplate.FrameSize[0], (int)plotTemplate.FrameSize[1]);
+                using var canvas = new SKCanvas(bitmap);
+
                 switch (plotTemplate.PlotType)
                 {
                     case enmPlotType.ncp:
@@ -447,59 +493,50 @@ namespace AspireApp.ApiService.Controllers
                                     {
                                         var (px, py) = (col * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2, row * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2);
                                         PaintPoint.Color = color;
-                                        Surface.Canvas.DrawPoint(new SKPoint(point.X + px, point.Y + py), PaintPoint);
+                                        canvas.DrawPoint(new SKPoint(pointRef.X + px, pointRef.Y - py), PaintPoint);
                                     }
                                 }
                             }
+                            Surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
                             break;
                         }
                     case enmPlotType.linechart:
                         {
-                            var arrX = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);                            
-                            var arrY = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
-                            
-                            AxisValues = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
-
-                            // X axis:
-                            int totalMaxJumps = 10;
-                            var (minX, maxX, baseX) = DataTransformation.AdjustLimits(0, arrX.Length, totalMaxJumps, true);
-                            AxisValues[0] = new double[] { minX, maxX, baseX };
-
-                            // Y axis:
-                            totalMaxJumps = 6;
-                            var (minY, maxY, baseY) = DataTransformation.AdjustLimits(arrY.Min(), arrY.Max(), totalMaxJumps, true);
-                            AxisValues[1] = new double[] { minY, maxY, baseY };
-
-                            var path = new SKPath();                            
+                            var arrX = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);                                                                                   
                             float px, py;
+                            SKPath path;
 
-                            path = new SKPath();
-                            path.MoveTo(point);
-
-                            for (int i = 0; i < arrX.Length; i++)
+                            for (int j = 1; j < plotItem.ArrayData.GetLength(0); j++) // Start from index 1 the n curves for Y axis
                             {
-                                px = (float)(point.X + arrX[i] * plotTemplate.Axis[0].Scale);
-                                py = (float)(point.Y - arrY[i] * plotTemplate.Axis[1].Scale);
+                                var arrY = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(j), null }!);
+                                path = new SKPath();
+                                path.MoveTo(pointRef);
 
-                                if (i == 0)
-                                    path.MoveTo(px, py);
-                                else
-                                    path.LineTo(px, py);
+                                for (int i = 0; i < arrX.Length; i++)
+                                {
+                                    px = (float)(pointRef.X + arrX[i] * plotTemplate.Axis[0].Scale);
+                                    py = (float)(pointRef.Y - arrY[i] * plotTemplate.Axis[1].Scale);
+                                    if (i == 0)
+                                        path.MoveTo(px, py);
+                                    else
+                                        path.LineTo(px, py);
+                                }
+
+                                // Draw into canvas:
+                                var paint = new SKPaint()
+                                {
+                                    Color = Constants.Brushes[j-1],
+                                    IsAntialias = false,
+                                    IsStroke = false,
+                                    StrokeWidth = 1f,
+                                    Style = SKPaintStyle.Stroke
+                                };
+
+                                canvas.DrawPath(path, paint);
+                                canvas.DrawPoint(pointRef, PaintBack);
+                                path.Close();
                             }
-
-                            // Draw into canvas:
-                            var paint = new SKPaint()
-                            {
-                                Color = new SKColor(31, 119, 180),
-                                IsAntialias = false,
-                                IsStroke = false,
-                                StrokeWidth = 2f,
-                                Style = SKPaintStyle.Stroke
-                            };
-
-                            Surface.Canvas.DrawPath(path, paint);
-
-                            path.Close();
+                            Surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));                            
                             break;
                         }
                 }
@@ -517,28 +554,31 @@ namespace AspireApp.ApiService.Controllers
         /// <param name="point"></param>
         protected void DrawPlot(PlotItem plotItem)
         {
-            PlotTemplate? plotImage = null;
+            PlotTemplate? plotTemplate = null;
             var pointRef = new SKPoint(plotItem.PointRef[0], ImageInfo.Height - plotItem.PointRef[1]);
 
             if (!string.IsNullOrEmpty(plotItem.Name))
-                plotImage = pictureTemplate.PlotTemplates.Where(x => x.Name == plotItem.Name)!.FirstOrDefault();
+                plotTemplate = pictureTemplate.PlotTemplates.Where(x => x.Name == plotItem.Name)!.FirstOrDefault();
 
-            if (plotImage != null)
-            {  
+            if (plotTemplate != null)
+            {
+                // Set Plot Title:
+                DrawPlotTitle(plotTemplate, pointRef, (plotItem.IndexRef.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty));
+
                 // Draw layout:
-                DrawLayout(plotImage, pointRef);
+                DrawLayout(plotTemplate, pointRef);
 
                 // Draw array data:
-                DrawData(plotImage, pointRef, plotItem);                
+                DrawData(plotTemplate, pointRef, plotItem);                
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        protected void SetNoData(PlotTemplate plotImage, SKPoint point)
+        protected void SetNoData(PlotTemplate plotTemplate, SKPoint point)
         {
-            Surface.Canvas.DrawText("No data", new SKPoint(point.X + plotImage.FrameSize[0] / 2 - 20, point.Y + plotImage.FrameSize[1] / 2), PaintText);
+            Surface.Canvas.DrawText("No data", new SKPoint(point.X + plotTemplate.FrameSize[0] / 2 - 20, point.Y - plotTemplate.FrameSize[1] / 2), PaintText);
         }
 
         /// <summary>
@@ -564,7 +604,6 @@ namespace AspireApp.ApiService.Controllers
             //get binary data
             return image;
         }
-
 
         /// <summary>
         /// 

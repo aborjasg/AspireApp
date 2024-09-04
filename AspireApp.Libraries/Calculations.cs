@@ -8,18 +8,31 @@ namespace AspireApp.Libraries
         public delegate double MyFunction(double x);
 
         public static double[,] GetChartData()
-        {            
-            double[] x = new double[10];
-            for (int i = 0; i < 10; i++)
-                x[i] = i;
+        {
+            int n = 21; // # points
+            double[] arrX = new double[n];
+            for (int i = 0; i < n; i++)
+                arrX[i] = (-n/2) + i;
 
-            Func<double, double> square = x => Math.Sqrt(x);
-            var y = CalculateY(square, x);
-            //Console.WriteLine(alglib.ap.format(y, 4));
-            //var arrData = new double[,] { Array.Empty<double>(), new double[] { } };
-            var arrData = Array.CreateInstance(typeof(double), new int[] { 2, 10 });
-            arrData.SetValue(x, new int?[] { 0, null });
-            arrData.SetValue(y, new int?[] { 1, null });
+            Func<double, double> Func0 = x => Math.Atan(x);
+            var arrY0 = CalculateY(Func0, arrX);
+
+            Func<double, double> Sin = x => Math.Sin(x);
+            var arrY1 = CalculateY(Sin, arrX);
+
+            Func<double, double> Cos = x => Math.Cos(x);
+            var arrY2 = CalculateY(Cos, arrX);
+
+            Func<double, double> Pow = x => Math.Pow(x, 2);
+            var arrY3 = CalculateY(Pow, arrX);
+
+            var arrData = Array.CreateInstance(typeof(double), new int[] { 5, n });
+            arrData.SetValue(arrX, new int?[] { 0, null });
+            arrData.SetValue(arrY0, new int?[] { 1, null });
+            arrData.SetValue(arrY1, new int?[] { 2, null });
+            arrData.SetValue(arrY2, new int?[] { 3, null });
+            arrData.SetValue(arrY3, new int?[] { 4, null });
+
             return (double[,])arrData;
         }
 
