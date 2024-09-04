@@ -1,7 +1,7 @@
 [
   {
     "Name": "Combined_NCP",
-    "Title": "Combined NCP",
+    "Title": "Combined NCP (Picture)",
     "PictureDimensions": [ 640, 960 ],
     "PictureLayout": [ 2, 4 ],
     "PicturePreviewFlag": true,
@@ -11,7 +11,7 @@
     "PlotTemplates": [
       {
         "Name": "Combined_NCP",
-        "Title": "NCP",
+        "Title": "NCP (Plot)",
         "PlotType": "ncp",
         "AreaLayout": "Squad",
         "FrameSize": [ 288, 192 ],
@@ -21,11 +21,45 @@
           {
             "Label": "X",
             "Range": [ 0, 36, 6 ],
-            "Offset": [ 0, 0 ]
+            "Offset": [ 4, 4 ] // StrokeWidth / 2
           },
           {
             "Label": "Y",
             "Range": [ 0, 24, 6 ],
+            "Offset": [ 4, 4 ] // StrokeWidth / 2
+          }
+        ],
+        "Active": true
+      }
+    ]
+  },
+  {
+    "Name": "LineChart",
+    "Title": "LineChart (Picture)",
+    "PictureDimensions": [ 360, 280 ],
+    "PictureLayout": [ 0, 0 ],
+    "PicturePreviewFlag": true,
+    "PicturePreviewPath": "C:\\Redlen\\Plots\\",
+    "StartPoint": [ 10, 10 ],
+    "PlotSpacing": [ 10, 10 ],
+    "PlotTemplates": [
+      {
+        "Name": "LineChart",
+        "Title": "LineChart (Plot)",
+        "PlotType": "linechart",
+        "AreaLayout": "Plain",
+        "FrameSize": [ 320, 240 ],
+        "FrameSpace": [],
+        "StrokeWidth": 2,
+        "Axis": [
+          {
+            "Label": "X",
+            "Range": [],
+            "Offset": [ 0, 0 ]
+          },
+          {
+            "Label": "Y",
+            "Range": [],
             "Offset": [ 0, 0 ]
           }
         ],

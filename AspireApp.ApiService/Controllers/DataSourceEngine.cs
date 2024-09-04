@@ -1,4 +1,5 @@
-﻿using AspireApp.ServiceDefaults.Models;
+﻿using AspireApp.Libraries;
+using AspireApp.ServiceDefaults.Models;
 using AspireApp.ServiceDefaults.Shared;
 using Newtonsoft.Json;
 using System;
@@ -23,9 +24,7 @@ namespace AspireApp.ApiService.Controllers
                 var templates = JsonConvert.DeserializeObject<PictureTemplate[]>(json);
                 if (templates != null)
                 {
-                    template = templates!.Where(x => x.Name == derivedData.Name)!.FirstOrDefault()!;
-                    if (template != null)                    
-                        derivedData.PlotItems = GetDataSource(name, template);                    
+                    template = templates!.Where(x => x.Name == derivedData.Name)!.FirstOrDefault()!;                       
                 }
             }
         }
@@ -59,11 +58,22 @@ namespace AspireApp.ApiService.Controllers
                             }
                         break;
                     }
+                case "LineChart":
+                    {                        
+                        var arrData = Calculations.GetChartData();
+                        result.Add(new PlotItem() { Name = testType, ArrayData = arrData, PointRef = template.StartPoint });
+                        break;
+                    }
             }
             return result;
         }
 
-        public DerivedData GetDerivedData() { return derivedData; }
+        public DerivedData GetDerivedData() 
+        {
+            if (template != null)
+                derivedData.PlotItems = GetDataSource(derivedData.Name, template);
+            return derivedData; 
+        }
         public PictureTemplate GetPictureTemplate() { return template; }
     }
 }

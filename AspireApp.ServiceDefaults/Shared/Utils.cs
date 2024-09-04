@@ -34,5 +34,6 @@ namespace AspireApp.ServiceDefaults.Shared
 
             return $"{logLevel} {((DateTime)dateTime).ToString(StandardDateTimeFormat)} {sender}{message}{recipient}";
         }
+
     }
 }

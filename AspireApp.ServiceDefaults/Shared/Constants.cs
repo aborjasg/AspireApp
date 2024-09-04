@@ -4,5 +4,6 @@
     {
         public const int NUM_COLS = 36;
         public const int NUM_ROWS = 24;
+        public static long UNITILIALIZED_VALUE = -99999;
     }
 }
