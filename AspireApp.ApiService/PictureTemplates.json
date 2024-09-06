@@ -64,6 +64,28 @@
           }
         ],
         "Active": true
+      },
+      {
+        "Name": "histogram",
+        "Title": "Histogram (Plot)",
+        "PlotType": "histogram",
+        "AreaLayout": "Plain",
+        "FrameSize": [ 320, 240 ],
+        "FrameSpace": [],
+        "StrokeWidth": 10,
+        "Axis": [
+          {
+            "Label": "X",
+            "Range": [ ],
+            "Offset": [ 5, 5 ]
+          },
+          {
+            "Label": "Y",
+            "Range": [ ],
+            "Offset": [ 0, 0 ]
+          }
+        ],
+        "Active": true
       }
     ]
   }

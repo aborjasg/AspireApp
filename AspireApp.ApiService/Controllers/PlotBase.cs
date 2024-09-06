@@ -26,41 +26,6 @@ namespace AspireApp.ApiService.Controllers
         /// <summary>
         /// 
         /// </summary>
-        protected double[][] GetScaledAxisValues(PlotTemplate plotTemplate, DerivedData derivedData)
-        {
-            var result = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
-
-            if (plotTemplate.Axis != null)
-            {
-                if (plotTemplate.Axis[0].Range != null && plotTemplate.Axis[0].Range.Length == 3)
-                {
-                    result[0] = plotTemplate.Axis[0].Range;
-                }
-                if (plotTemplate.Axis[1].Range != null && plotTemplate.Axis[1].Range.Length == 3)
-                {
-                    result[1] = plotTemplate.Axis[1].Range;
-                }
-            }
-            else
-            {
-                var arrX = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
-                var arrY = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
-
-                // X axis:
-                int totalMaxJumps = 10;
-                var (minX, maxX, baseX) = DataTransformation.AdjustLimits(0, arrX.Length, totalMaxJumps, true);
-                result[0] = new double[] { minX, maxX, baseX };
-
-                // Y axis:
-                totalMaxJumps = 6;
-                var (minY, maxY, baseY) = DataTransformation.AdjustLimits(arrY.Min(), arrY.Max(), totalMaxJumps, true);
-                result[1] = new double[] { minY, maxY, baseY };
-            }
-            return result;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="plotTemplate"></param>
         /// <returns></returns>
         protected (float, float) GetPoint0(PlotTemplate plotTemplate)
@@ -83,29 +48,31 @@ namespace AspireApp.ApiService.Controllers
 
         #region Public Methods
 
-        public void SetUpLayout(PlotTemplate plotTemplate, DerivedData derivedData)
+        public void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
         {
             // Set Frame Size:
             if (plotTemplate.FrameSize.Length > 0)
             {
                 double rangeX = 0, rangeY = 0, width = 0, height = 0;
 
-                AxisValues = GetScaledAxisValues(plotTemplate, derivedData);
-                rangeX = AxisValues[0][1] - AxisValues[0][0];
-                rangeY = AxisValues[1][1] - AxisValues[1][0];
+                if (AxisValues!.GetLength(0) > 0)
+                {
+                    rangeX = AxisValues[0][1] - AxisValues[0][0];
+                    rangeY = AxisValues[1][1] - AxisValues[1][0];
 
-                width = plotTemplate.FrameSize[0] - plotTemplate.Axis[0].Offset[0] - plotTemplate.Axis[0].Offset[1];
-                height = plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0] - plotTemplate.Axis[1].Offset[1];
+                    width = plotTemplate.FrameSize[0] - plotTemplate.Axis[0].Offset[0] - plotTemplate.Axis[0].Offset[1];
+                    height = plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0] - plotTemplate.Axis[1].Offset[1];
 
-                if (rangeX != 0)
-                    plotTemplate.Axis[0].Scale = width / rangeX;
-                else
-                    plotTemplate.Axis[0].Scale = 1;
+                    if (rangeX != 0)
+                        plotTemplate.Axis[0].Scale = width / rangeX;
+                    else
+                        plotTemplate.Axis[0].Scale = 1;
 
-                if (rangeY != 0)
-                    plotTemplate.Axis[1].Scale = height / rangeY;
-                else
-                    plotTemplate.Axis[1].Scale = 1;
+                    if (rangeY != 0)
+                        plotTemplate.Axis[1].Scale = height / rangeY;
+                    else
+                        plotTemplate.Axis[1].Scale = 1;
+                }
             }
         }
         public void DrawLayout(PlotTemplate plotTemplate, SKPoint point, SKSurface surface)

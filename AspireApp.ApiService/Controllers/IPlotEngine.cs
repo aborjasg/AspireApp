@@ -10,7 +10,7 @@ namespace AspireApp.ApiService
 {
     public interface IPlotEngine
     {
-        void SetUpLayout(PlotTemplate plotTemplate, DerivedData derivedData);
+        void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem);
         void DrawLayout(PlotTemplate plotTemplate, SKPoint point, SKSurface surface);
         void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, string addToTitle = "");
         void DrawAxis(PlotTemplate plotTemplate, SKPoint point, SKSurface surface);

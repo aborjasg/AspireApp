@@ -20,11 +20,11 @@ namespace AspireApp.ApiService.Controllers
         /// 
         /// </summary>
         /// <param name="plotTemplate"></param>
-        public new void SetUpLayout(PlotTemplate plotTemplate, DerivedData derivedData)
+        public new void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
         {
             // Get Scales:
             plotTemplate.FrameSize = new float[] { Constants.NUM_COLS * plotTemplate.StrokeWidth, Constants.NUM_ROWS * plotTemplate.StrokeWidth };            
-            base.SetUpLayout(plotTemplate, derivedData);
+            base.SetUpLayout(plotTemplate, plotItem);
         }
         /// <summary>
         /// 

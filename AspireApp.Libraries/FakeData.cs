@@ -1,13 +1,24 @@
 ﻿
+using AspireApp.Libraries.Models;
+using AspireApp.ServiceDefaults.Shared;
 using static alglib;
 
 namespace AspireApp.Libraries
 {
-    public static class Calculations
+    public static class FakeData
     {
-        public delegate double MyFunction(double x);
+        public static double[,] GetNcpData()
+        {
+            var result = new double[Constants.NUM_COLS, Constants.NUM_ROWS];
+            var random = new Random();
 
-        public static double[,] GetChartData()
+            for (int k = 0; k < 100; k++)
+                result[random.Next(0, Constants.NUM_COLS), random.Next(0, Constants.NUM_ROWS)] = 1;
+
+            return result;
+        }
+
+        public static double[,] GetLineChartData()
         {
             int n = 21; // # points
             double[] arrX = new double[n];
@@ -41,6 +52,26 @@ namespace AspireApp.Libraries
             arrData.SetValue(arrY4, new int?[] { 5, null });
             arrData.SetValue(arrY5, new int?[] { 6, null });
 
+            return (double[,])arrData;
+        }
+
+        public static double[,] GetHistogramData()
+        {
+            int n = 20;
+            var arrX = new int[n];
+            var arrY = new int[n];
+            var random = new Random();
+
+            var list = new List<int>();
+            for (int i = 0; i < n; i++)
+            {
+                arrX[i] = i;
+                arrY[i] = random.Next(0, 100);
+            }
+            
+            var arrData = Array.CreateInstance(typeof(double), new int[] { 2, n });
+            arrData.SetValue(arrX, new int?[] { 0, null });
+            arrData.SetValue(arrY, new int?[] { 1, null });
             return (double[,])arrData;
         }
 

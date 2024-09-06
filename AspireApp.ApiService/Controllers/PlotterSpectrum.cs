@@ -22,22 +22,56 @@ namespace AspireApp.ApiService.Controllers
         /// 
         /// </summary>
         /// <param name="plotTemplate"></param>
-        public new void SetUpLayout(PlotTemplate plotTemplate, DerivedData derivedData)
-        {
-            // Get Scales:
+        public new void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
+        {            
+            AxisValues = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
+
+            // Get ranges:
             if (plotTemplate.Axis[0].Range == null || plotTemplate.Axis[0].Range.Length == 0)
             {
-                var range = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
+                var range = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
                 plotTemplate.Axis[0].Range = new double[] { range[0], range[range.Length - 1], 1 };
             }
-
             if (plotTemplate.Axis[1].Range == null || plotTemplate.Axis[1].Range.Length == 0)
             {
-                var range = (double[])derivedData.PlotItems![0].ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
+                var range = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
                 plotTemplate.Axis[1].Range = new double[] { range[0], range[range.Length - 1], 1 };
             }
-            base.SetUpLayout(plotTemplate, derivedData);
+
+            switch (plotTemplate.PlotType)
+            {
+                case enmPlotType.linechart:
+                    {
+                        // Set Axises:
+                        if (plotTemplate.Axis[0].Range != null && plotTemplate.Axis[0].Range.Length == 3)
+                        {
+                            AxisValues[0] = plotTemplate.Axis[0].Range;
+                        }
+                        if (plotTemplate.Axis[1].Range != null && plotTemplate.Axis[1].Range.Length == 3)
+                        {
+                            AxisValues[1] = plotTemplate.Axis[1].Range;
+                        }
+                        break;
+                    }
+                case enmPlotType.histogram:
+                    {
+                        var arrX = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
+                        var arrY = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
+                        
+                        // Axis X  (auto-scaled if it's empty float[]):
+                        int jumps = 5;
+                        var (minX, maxX, baseX) = DataTransformation.AdjustLimits(arrX.Min(), arrX.Max(), jumps, true);
+                        AxisValues[0] = new double[] { minX, maxX, baseX };
+
+                        // Axis Y (auto-scaled if it's empty float[]):
+                        var (minY, maxY, baseY) = DataTransformation.AdjustLimits(arrY.Min(), arrY.Max(), jumps, true);
+                        AxisValues[1] = new double[] { minY, maxY, baseY };
+                        break;
+                    }
+            }
+            base.SetUpLayout(plotTemplate, plotItem);
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -91,11 +125,33 @@ namespace AspireApp.ApiService.Controllers
                                 canvas.DrawPath(path, paint);
                                 canvas.DrawPoint(pointRef, Constants.PaintBack);
                                 path.Close();
+                            }                            
+                            break;
+                        }
+                    case enmPlotType.histogram:
+                        {
+                            // Preparing plot:
+                            float px, py0, py1;
+                            SKColor color = new SKColor(31, 119, 180);
+                            var paintPoint = new SKPaint { Color = color, FilterQuality = SKFilterQuality.High, StrokeWidth = plotTemplate.StrokeWidth };
+                            var arrX = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
+                            var arrY = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
+                            
+                            for (int k = 0; k < arrX.Length; k++)
+                            {                               
+                                var refX = (arrX[k] - AxisValues![0][0]) * plotTemplate.Axis[0].Scale;
+                                var refY = (arrY[k] - AxisValues[1][0]) * plotTemplate.Axis[1].Scale;                               
+                                px = (float)(refX + plotTemplate.Axis[0].Offset[0]);
+                                py0 = (float)(plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0]);
+                                py1 = (float)(py0 - refY);
+
+                                canvas.DrawLine(new SKPoint(px, py0), new SKPoint(px, py1), paintPoint);
                             }
-                            surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
+
                             break;
                         }
                 }
+                surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
             }
             else
                 SetNoData(plotTemplate, point, surface);

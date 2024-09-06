@@ -86,7 +86,7 @@ namespace AspireApp.ApiService.Controllers
             if (plotTemplate != null)
             {
                 // Draw layout:
-                plotEngine.SetUpLayout(plotTemplate, derivedData);
+                plotEngine.SetUpLayout(plotTemplate, plotItem);
                 plotEngine.DrawLayout(plotTemplate, pointRef, Surface);
 
                 // Set Plot Title:

@@ -73,6 +73,6 @@ Utils.EventLog("Information", $"Row Id={id} -> Got the record");
 Utils.EventLog("Information", $"Row Id={id} -> Serialized: {JsonConvert.SerializeObject(row)}");
 */
 
-var result = Calculations.GetChartData();
+var result = FakeData.GetChartData();
 
 Utils.EventLog("Information", "End of Program");

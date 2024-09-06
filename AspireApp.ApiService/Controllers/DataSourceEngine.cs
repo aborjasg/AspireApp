@@ -48,22 +48,22 @@ namespace AspireApp.ApiService.Controllers
                         for (int j = 0; j < template.PictureLayout[1]; j++)
                             for (int i = 0; i < template.PictureLayout[0]; i++)
                             {
-                                var arrData = new double[Constants.NUM_COLS, Constants.NUM_ROWS];
-                                for (int k = 0; k < 100; k++)
-                                    arrData[random.Next(0, Constants.NUM_COLS), random.Next(0, Constants.NUM_ROWS)] = 1;
-                                arrData[0, 1] = 1;
+                                double[,]? arrData;
                                 if (i == 0 && j == 0) // For testing purposes
                                     arrData = null;
-                                
+                                else
+                                    arrData = FakeData.GetNcpData();
+
                                 result.Add(new PlotItem() { Name = enmPlotType.ncp.ToString(), ArrayData = arrData!, PointRef = [template.StartPoint[0] + (i * (288 + template.PlotSpacing[0])), template.StartPoint[1] + (j * (192 + template.PlotSpacing[1]))], IndexRef = [ i, j ] });
                             }
                         break;
                     }
                 case enmTestType.spectrum:
                     {                        
-                        var arrData = Calculations.GetChartData();
-                        result.Add(new PlotItem() { Name = enmPlotType.linechart.ToString(), ArrayData = arrData, PointRef = template.StartPoint, IndexRef = [0, 0] });
-                        result.Add(new PlotItem() { Name = enmPlotType.linechart.ToString(), ArrayData = arrData, PointRef = [template.StartPoint[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
+                        var arrData1 = FakeData.GetLineChartData();
+                        var arrData2 = FakeData.GetHistogramData();
+                        result.Add(new PlotItem() { Name = enmPlotType.linechart.ToString(), ArrayData = arrData1, PointRef = template.StartPoint, IndexRef = [0, 0] });
+                        result.Add(new PlotItem() { Name = enmPlotType.histogram.ToString(), ArrayData = arrData2, PointRef = [template.StartPoint[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
                         break;
                     }
             }
