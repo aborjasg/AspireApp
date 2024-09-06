@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AspireApp.ServiceDefaults.Models
+namespace AspireApp.Libraries.Models
 {
     /// <summary>
     /// 
@@ -13,7 +13,7 @@ namespace AspireApp.ServiceDefaults.Models
     {
         public int Id { get; set; } = 0;
         public string Type { get; set; } = string.Empty;
-        public string Message { get; set; } = string.Empty ;
+        public string Message { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
     }
 }

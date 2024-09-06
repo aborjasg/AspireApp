@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Runtime.Serialization;
 
-namespace AspireApp.ServiceDefaults.Models
+namespace AspireApp.Libraries.Models
 {
     /// <summary>
     /// 

@@ -2,7 +2,7 @@
 
 using AspireApp.ApiService.DataAccess;
 using AspireApp.Libraries;
-using AspireApp.ServiceDefaults.Models;
+using AspireApp.Libraries.Models;
 using AspireApp.ServiceDefaults.Shared;
 using IdentityModel.OidcClient;
 using Microsoft.VisualBasic;

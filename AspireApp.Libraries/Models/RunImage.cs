@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using System.Text.Json;
 
-namespace AspireApp.ServiceDefaults.Models;
+namespace AspireApp.Libraries.Models;
 
 /// <summary>
 /// 
@@ -18,7 +18,7 @@ public partial class RunImage : ModelBase
     /// <summary>
     /// 
     /// </summary>
-    public string Name { get; set; } = string.Empty; 
+    public string Name { get; set; } = string.Empty;
     /// <summary>
     /// 
     /// </summary>
@@ -35,7 +35,7 @@ public partial class RunImage : ModelBase
     public RunImage(string name, RunMetadata metadata, DerivedData derivedData, string plotImage) : this()
     {
         Name = name;
-        Metadata = JsonConvert.SerializeObject(metadata); 
+        Metadata = JsonConvert.SerializeObject(metadata);
         DataSource = UtilsForMessages.Compress(JsonConvert.SerializeObject(derivedData));
         Content = UtilsForMessages.Compress(plotImage);
     }

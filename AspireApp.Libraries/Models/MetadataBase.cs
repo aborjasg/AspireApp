@@ -1,4 +1,4 @@
-﻿namespace AspireApp.ServiceDefaults.Models
+﻿namespace AspireApp.Libraries.Models
 {
     /// <summary>
     /// 

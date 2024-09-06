@@ -1,5 +1,6 @@
 ﻿//#define UnuseUnsafe	//do not use unsafe code, this is for code testing those are not using unsafe
 
+using AspireApp.Libraries.Enums;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.Statistics;
@@ -20,11 +21,11 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AspireApp.Libraries
 {
-	/// <summary>
-	/// C# array extentions.
-	/// most methods are implementations of Numpy (Python)
-	/// </summary>
-	public static class ArrayExtensions
+    /// <summary>
+    /// C# array extentions.
+    /// most methods are implementations of Numpy (Python)
+    /// </summary>
+    public static class ArrayExtensions
 	{
 		/// <summary>
 		/// Gets value(s) from specified indices.

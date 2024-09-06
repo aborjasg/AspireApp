@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AspireApp.Libraries
+namespace AspireApp.Libraries.Enums
 {
     /// <summary>
     /// 

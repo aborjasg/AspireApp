@@ -1,6 +1,6 @@
 [
   {
-    "Name": "Combined_NCP",
+    "Name": "ncps",
     "Title": "Combined NCP (Picture)",
     "PictureDimensions": [ 640, 960 ],
     "PictureLayout": [ 2, 4 ],
@@ -34,9 +34,9 @@
     ]
   },
   {
-    "Name": "LineChart",
-    "Title": "LineChart (Picture)",
-    "PictureDimensions": [ 360, 280 ],
+    "Name": "spectrum",
+    "Title": "Spectrum (Picture)",
+    "PictureDimensions": [ 720, 280 ],
     "PictureLayout": [ 0, 0 ],
     "PicturePreviewFlag": true,
     "PicturePreviewPath": "C:\\Redlen\\Plots\\",
@@ -44,7 +44,7 @@
     "PlotSpacing": [ 10, 10 ],
     "PlotTemplates": [
       {
-        "Name": "LineChart",
+        "Name": "linechart",
         "Title": "LineChart (Plot)",
         "PlotType": "linechart",
         "AreaLayout": "Plain",
@@ -54,12 +54,12 @@
         "Axis": [
           {
             "Label": "X",
-            "Range": [-10, 10, 1],
+            "Range": [ -10, 10, 1 ],
             "Offset": [ 0, 0 ]
           },
           {
             "Label": "Y",
-            "Range": [-10, 10, 1],
+            "Range": [ -10, 10, 1 ],
             "Offset": [ 0, 0 ]
           }
         ],

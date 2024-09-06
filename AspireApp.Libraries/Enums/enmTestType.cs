@@ -1,4 +1,4 @@
-﻿namespace AspireApp.Libraries
+﻿namespace AspireApp.Libraries.Enums
 {
     /// <summary>
     /// 

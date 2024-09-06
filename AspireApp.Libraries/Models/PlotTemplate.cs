@@ -1,6 +1,6 @@
 ﻿using AspireApp.ServiceDefaults.Shared;
 
-namespace AspireApp.ServiceDefaults.Models
+namespace AspireApp.Libraries.Models
 {
     public class PlotTemplate
     {

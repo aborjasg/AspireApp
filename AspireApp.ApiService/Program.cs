@@ -1,6 +1,9 @@
+using AspireApp.ApiService;
 using AspireApp.ApiService.Controllers;
 using AspireApp.ApiService.DataAccess;
-using AspireApp.ServiceDefaults.Models;
+using AspireApp.Libraries;
+using AspireApp.Libraries.Enums;
+using AspireApp.Libraries.Models;
 using AspireApp.ServiceDefaults.Shared;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
@@ -39,10 +42,16 @@ app.MapPost("/processData", (ConnectionString connectionString, RunImage record)
     if (!string.IsNullOrEmpty(record.DataSource))
     {
         var derivedData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(record.DataSource))!;
-        var engine = new DataSourceEngine(derivedData.Name);
-        var template = engine.GetPictureTemplate();
-        var plotter = new PlotBase(new PictureEngine(template, derivedData));
-        var image = plotter.MakePicture()!;
+        var dataEngine = new DataSourceEngine(derivedData.Name);
+        var template = dataEngine.GetPictureTemplate();
+        IPlotEngine? plotEngine = Enum.Parse<enmTestType>(derivedData.Name) switch
+        {
+            enmTestType.ncps => new PlotterNCP(),
+            enmTestType.spectrum => new PlotterSpectrum(),
+            _ => null
+        };
+        var pictureEngine = new PictureEngine(template, derivedData, plotEngine!);
+        var image = pictureEngine.MakePicture()!;
         var metadata = new RunMetadata(derivedData.Name, template);
         return new RunImage(derivedData.Name, metadata, derivedData, image);        
     }

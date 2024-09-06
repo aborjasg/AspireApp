@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace AspireApp.ServiceDefaults.Models
+namespace AspireApp.Libraries.Models
 {
     public class PlotLegend
     {

@@ -1,5 +1,6 @@
 ﻿using AspireApp.Libraries;
-using AspireApp.ServiceDefaults.Models;
+using AspireApp.Libraries.Enums;
+using AspireApp.Libraries.Models;
 using AspireApp.ServiceDefaults.Shared;
 using Newtonsoft.Json;
 using System;
@@ -38,9 +39,9 @@ namespace AspireApp.ApiService.Controllers
         private List<PlotItem> GetDataSource(string testType, PictureTemplate template)
         {
             var result = new List<PlotItem>();
-            switch (testType)
+            switch (Enum.Parse<enmTestType>(testType))
             {
-                case "Combined_NCP":
+                case enmTestType.ncps:
                     {
                         var random = new Random();
                         // Preparing data sample:
@@ -54,14 +55,15 @@ namespace AspireApp.ApiService.Controllers
                                 if (i == 0 && j == 0) // For testing purposes
                                     arrData = null;
                                 
-                                result.Add(new PlotItem() { Name = testType, ArrayData = arrData!, PointRef = [template.StartPoint[0] + (i * (288 + template.PlotSpacing[0])), template.StartPoint[1] + (j * (192 + template.PlotSpacing[1]))], IndexRef = [ i, j ] });
+                                result.Add(new PlotItem() { Name = enmPlotType.ncp.ToString(), ArrayData = arrData!, PointRef = [template.StartPoint[0] + (i * (288 + template.PlotSpacing[0])), template.StartPoint[1] + (j * (192 + template.PlotSpacing[1]))], IndexRef = [ i, j ] });
                             }
                         break;
                     }
-                case "LineChart":
+                case enmTestType.spectrum:
                     {                        
                         var arrData = Calculations.GetChartData();
-                        result.Add(new PlotItem() { Name = testType, ArrayData = arrData, PointRef = template.StartPoint });
+                        result.Add(new PlotItem() { Name = enmPlotType.linechart.ToString(), ArrayData = arrData, PointRef = template.StartPoint, IndexRef = [0, 0] });
+                        result.Add(new PlotItem() { Name = enmPlotType.linechart.ToString(), ArrayData = arrData, PointRef = [template.StartPoint[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
                         break;
                     }
             }

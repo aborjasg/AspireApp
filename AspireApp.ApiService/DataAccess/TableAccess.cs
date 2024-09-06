@@ -1,7 +1,7 @@
 ﻿using Npgsql;
 using System.Data;
 using Dapper;
-using AspireApp.ServiceDefaults.Models;
+using AspireApp.Libraries.Models;
 
 namespace AspireApp.ApiService.DataAccess
 {

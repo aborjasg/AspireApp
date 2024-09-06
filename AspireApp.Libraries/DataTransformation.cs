@@ -9,8 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
-using AspireApp.Libraries;
 using static alglib;
+using AspireApp.Libraries.Enums;
 
 namespace AspireApp.Libraries
 {

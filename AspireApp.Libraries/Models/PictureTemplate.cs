@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using AspireApp.Libraries.Enums;
+using AspireApp.ServiceDefaults.Shared;
+using Newtonsoft.Json;
 
-namespace AspireApp.ServiceDefaults.Models
+namespace AspireApp.Libraries.Models
 {
     public class PictureTemplate
     {
@@ -12,6 +14,7 @@ namespace AspireApp.ServiceDefaults.Models
         /// 
         /// </summary>
         public string Title { get; set; } = "";
+        public enmTestType TestType;
         /// <summary>
         /// 
         /// </summary>

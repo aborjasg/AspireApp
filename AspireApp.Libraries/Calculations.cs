@@ -14,24 +14,32 @@ namespace AspireApp.Libraries
             for (int i = 0; i < n; i++)
                 arrX[i] = (-n/2) + i;
 
-            Func<double, double> Func0 = x => Math.Atan(x);
+            Func<double, double> Func0 = x => Math.Exp(x);
             var arrY0 = CalculateY(Func0, arrX);
 
-            Func<double, double> Sin = x => Math.Sin(x);
-            var arrY1 = CalculateY(Sin, arrX);
+            Func<double, double> Func1 = x => Math.Sin(x);
+            var arrY1 = CalculateY(Func1, arrX);
 
-            Func<double, double> Cos = x => Math.Cos(x);
-            var arrY2 = CalculateY(Cos, arrX);
+            Func<double, double> Func2 = x => Math.Cos(x);
+            var arrY2 = CalculateY(Func2, arrX);
 
-            Func<double, double> Pow = x => Math.Pow(x, 2);
-            var arrY3 = CalculateY(Pow, arrX);
+            Func<double, double> Func3 = x => Math.Tan(x);
+            var arrY3 = CalculateY(Func3, arrX);
 
-            var arrData = Array.CreateInstance(typeof(double), new int[] { 5, n });
+            Func<double, double> Func4 = x => Math.Sqrt(x);
+            var arrY4 = CalculateY(Func4, arrX);
+
+            Func<double, double> Func5 = x => Math.Pow(x, 2);
+            var arrY5 = CalculateY(Func5, arrX);
+
+            var arrData = Array.CreateInstance(typeof(double), new int[] { 7, n });
             arrData.SetValue(arrX, new int?[] { 0, null });
             arrData.SetValue(arrY0, new int?[] { 1, null });
             arrData.SetValue(arrY1, new int?[] { 2, null });
             arrData.SetValue(arrY2, new int?[] { 3, null });
             arrData.SetValue(arrY3, new int?[] { 4, null });
+            arrData.SetValue(arrY4, new int?[] { 5, null });
+            arrData.SetValue(arrY5, new int?[] { 6, null });
 
             return (double[,])arrData;
         }

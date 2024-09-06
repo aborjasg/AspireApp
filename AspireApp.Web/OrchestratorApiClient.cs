@@ -1,4 +1,4 @@
-﻿using AspireApp.ServiceDefaults.Models;
+﻿using AspireApp.Libraries.Models;
 using System.Net.Http.Json;
 
 namespace AspireApp.Web
