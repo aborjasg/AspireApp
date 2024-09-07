@@ -75,6 +75,18 @@ namespace AspireApp.Libraries
             return (double[,])arrData;
         }
 
+        public static double[,] GetHeatMapData()
+        {
+            var result = new double[Constants.NUM_COLS, Constants.NUM_ROWS];
+            var random = new Random();
+
+            for (int j = 0; j < result.GetLength(0); j++)
+                for (int i = 0; i < result.GetLength(1); i++)                
+                    result[j, i] = (double)(random.Next(55, 95))/100d;
+        
+            return result;
+        }
+
         /// <summary>
         /// 
         /// </summary>

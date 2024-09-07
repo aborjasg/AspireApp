@@ -76,15 +76,115 @@
         "Axis": [
           {
             "Label": "X",
-            "Range": [ ],
+            "Range": [],
             "Offset": [ 5, 5 ]
           },
           {
             "Label": "Y",
-            "Range": [ ],
+            "Range": [],
             "Offset": [ 0, 0 ]
           }
         ],
+        "Active": true
+      }
+    ]
+  },
+  {
+    "Name": "energy_cal",
+    "Title": "Energy Calibration (Picture)",
+    "PictureDimensions": [ 760, 280 ],
+    "PictureLayout": [ 0, 0 ],
+    "PicturePreviewFlag": true,
+    "PicturePreviewPath": "C:\\Redlen\\Plots\\",
+    "StartPoint": [ 20, 20 ],
+    "PlotSpacing": [ 10, 10 ],
+    "PlotTemplates": [
+      {
+        "Name": "heatmap",
+        "Title": "Heatmap (Plot)",
+        "PlotType": "heatmap",
+        "AreaLayout": "Plain",
+        "FrameSize": [ 360, 240 ],
+        "FrameSpace": [],
+        "StrokeWidth": 10,
+        "Axis": [
+          {
+            "Label": "X",
+            "Range": [ 0, 36, 6 ],
+            "Offset": [ 5, 5 ] // StrokeWidth / 2
+          },
+          {
+            "Label": "Y",
+            "Range": [ 0, 24, 6 ],
+            "Offset": [ 5, 5 ] // StrokeWidth / 2
+          }
+        ],
+        "Bar": {
+          "Point": [
+            340,
+            50
+          ],
+          "Size": [
+            8,
+            192
+          ],
+          "Colors": [],
+          "ColorPositions": [],
+          "ColorMap": "viridis",
+          "Labels": [
+            0.55,
+            0.95,
+            0.05
+          ],
+          "Offset": [
+            0,
+            0
+          ]
+        },
+        "Active": true
+      },
+      {
+        "Name": "histogram",
+        "Title": "Histogram (Plot)",
+        "PlotType": "histogram",
+        "AreaLayout": "Plain",
+        "FrameSize": [ 320, 240 ],
+        "FrameSpace": [10, 0],
+        "StrokeWidth": 20,
+        "Axis": [
+          {
+            "Label": "X",
+            "Range": [],
+            "Offset": [ 10, 10 ]
+          },
+          {
+            "Label": "Y",
+            "Range": [],
+            "Offset": [ 0, 0 ]
+          }
+        ],
+        "Bar": {
+          "Point": [
+            340,
+            50
+          ],
+          "Size": [
+            8,
+            192
+          ],
+          "Colors": [],
+          "ColorPositions": [],
+          "ColorMap": "viridis",
+          "Labels": [
+            0.55,
+            0.95,
+            0.05
+          ],
+          "Offset": [
+            0,
+            0
+          ]
+        },
         "Active": true
       }
     ]

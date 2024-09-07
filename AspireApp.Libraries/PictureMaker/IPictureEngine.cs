@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AspireApp.ApiService
+namespace AspireApp.Libraries.PictureMaker
 {
     public interface IPictureEngine
     {

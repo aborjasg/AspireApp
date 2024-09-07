@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace AspireApp.ApiService.Controllers
+namespace AspireApp.Libraries.PictureMaker
 {
     public class PictureEngine : IPictureEngine
     {
@@ -26,7 +26,7 @@ namespace AspireApp.ApiService.Controllers
         /// <summary>
         /// 
         /// </summary>
-        protected DerivedData derivedData;        
+        protected DerivedData derivedData;
         /// <summary>
         /// 
         /// </summary>
@@ -52,7 +52,7 @@ namespace AspireApp.ApiService.Controllers
         /// 
         /// </summary>
         public SKSurface Surface;
-        
+
         #endregion
 
         public PictureEngine(PictureTemplate pictureTemplate, DerivedData derivedData, IPlotEngine plotEngine)
@@ -61,7 +61,7 @@ namespace AspireApp.ApiService.Controllers
             this.pictureTemplate = pictureTemplate;
             ImageInfo = new SKImageInfo(pictureTemplate.PictureDimensions[0], pictureTemplate.PictureDimensions[1]);
             Surface = SKSurface.Create(ImageInfo);
-            Surface.Canvas.Clear(SKColors.White);            
+            Surface.Canvas.Clear(SKColors.White);
             this.derivedData = derivedData;
             this.plotEngine = plotEngine;
         }
@@ -85,17 +85,17 @@ namespace AspireApp.ApiService.Controllers
 
             if (plotTemplate != null)
             {
-                // Draw layout:
-                plotEngine.SetUpLayout(plotTemplate, plotItem);
-                plotEngine.DrawLayout(plotTemplate, pointRef, Surface);
+                //// Draw layout:
+                //plotEngine.SetUpLayout(plotTemplate, plotItem);
+                //plotEngine.DrawLayout(plotTemplate, pointRef, Surface);
 
                 // Set Plot Title:
-                plotEngine.DrawPlotTitle(plotTemplate, pointRef, Surface, (plotItem.IndexRef.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty));
+                plotEngine.DrawPlotTitle(plotTemplate, pointRef, Surface, plotItem.IndexRef.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty);
 
                 // Draw array data:
-                plotEngine.DrawData(plotTemplate, pointRef, Surface, plotItem);                
+                plotEngine.DrawData(plotTemplate, pointRef, Surface, plotItem);
             }
-        }        
+        }
         /// <summary>
         /// 
         /// </summary>

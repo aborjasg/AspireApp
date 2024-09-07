@@ -1,24 +1,24 @@
-﻿using AspireApp.Libraries;
-using AspireApp.Libraries.Models;
+﻿using AspireApp.Libraries.Models;
 using AspireApp.ServiceDefaults.Shared;
 using SkiaSharp;
 using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace AspireApp.ApiService.Controllers
+namespace AspireApp.Libraries.PictureMaker
 {
-    public class PlotBase: IPlotEngine
+    public class PlotBase : IPlotEngine
     {
         /// <summary>
         /// 
         /// </summary>
-        protected double[][]? AxisValues { get; set; }
+        protected double[][] AxisValues { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         public PlotBase()
         {
+            AxisValues = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
         }
 
         #region Protected/Private Methods
@@ -42,31 +42,33 @@ namespace AspireApp.ApiService.Controllers
         {
             surface.Canvas.DrawText("No data", new SKPoint(point.X + plotTemplate.FrameSize[0] / 2 - 20, point.Y - plotTemplate.FrameSize[1] / 2), Constants.PaintText);
         }
-
-        #endregion
-
-
-        #region Public Methods
-
-        public void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plotTemplate"></param>
+        /// <param name="plotItem"></param>
+        protected void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
         {
             // Set Frame Size:
             if (plotTemplate.FrameSize.Length > 0)
             {
                 double rangeX = 0, rangeY = 0, width = 0, height = 0;
 
-                if (AxisValues!.GetLength(0) > 0)
+                if (AxisValues![0].Length > 0)
                 {
                     rangeX = AxisValues[0][1] - AxisValues[0][0];
-                    rangeY = AxisValues[1][1] - AxisValues[1][0];
-
                     width = plotTemplate.FrameSize[0] - plotTemplate.Axis[0].Offset[0] - plotTemplate.Axis[0].Offset[1];
-                    height = plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0] - plotTemplate.Axis[1].Offset[1];
 
                     if (rangeX != 0)
                         plotTemplate.Axis[0].Scale = width / rangeX;
                     else
                         plotTemplate.Axis[0].Scale = 1;
+                }
+
+                if (AxisValues![1].Length > 0)
+                {
+                    rangeY = AxisValues[1][1] - AxisValues[1][0];
+                    height = plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0] - plotTemplate.Axis[1].Offset[1];
 
                     if (rangeY != 0)
                         plotTemplate.Axis[1].Scale = height / rangeY;
@@ -75,7 +77,13 @@ namespace AspireApp.ApiService.Controllers
                 }
             }
         }
-        public void DrawLayout(PlotTemplate plotTemplate, SKPoint point, SKSurface surface)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plotTemplate"></param>
+        /// <param name="point"></param>
+        /// <param name="surface"></param>
+        protected void DrawLayout(PlotTemplate plotTemplate, SKPoint point, SKSurface surface)
         {
             var paintSquare = Constants.PaintSquare;
 
@@ -96,7 +104,7 @@ namespace AspireApp.ApiService.Controllers
                     {
                         float x0 = (float)point.X, x1 = point.X + plotTemplate.FrameSize[0], y0 = point.Y - plotTemplate.FrameSize[1], y1 = point.Y;
                         float space = plotTemplate.StrokeWidth;
-                        
+
                         // Dotted-line matrix:
                         for (float k = x0; k <= x1; k += space)
                         {
@@ -121,13 +129,14 @@ namespace AspireApp.ApiService.Controllers
                         break;
                     }
             }
-            DrawAxis(plotTemplate, point, surface);
         }
-        public void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, string addToTitle = "")
-        {
-            surface.Canvas.DrawText(plotTemplate.Title + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
-        }
-        public void DrawAxis(PlotTemplate plotTemplate, SKPoint point, SKSurface surface)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plotTemplate"></param>
+        /// <param name="point"></param>
+        /// <param name="surface"></param>
+        protected void DrawAxis(PlotTemplate plotTemplate, SKPoint point, SKSurface surface)
         {
             SKPaint paint = Constants.PaintTextSmall.Clone();
 
@@ -161,9 +170,33 @@ namespace AspireApp.ApiService.Controllers
                 }
             }
         }
-        public void DrawData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem)
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plotTemplate"></param>
+        /// <param name="point"></param>
+        /// <param name="surface"></param>
+        /// <param name="addToTitle"></param>
+        public void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, string addToTitle = "")
         {
-            
+            surface.Canvas.DrawText(plotTemplate.Title + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
+        }     
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plotTemplate"></param>
+        /// <param name="point"></param>
+        /// <param name="surface"></param>
+        /// <param name="plotItem"></param>
+        public void DrawData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem)
+        {            
+            DrawLayout(plotTemplate, point, surface);
+            DrawAxis(plotTemplate, point, surface);
         }
 
         #endregion

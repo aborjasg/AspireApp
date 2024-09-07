@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AspireApp.ApiService.Controllers
+namespace AspireApp.Libraries.PictureMaker
 {
-    internal class PlotterNCP : PlotBase, IPlotEngine
+    public class PlotterNCP : PlotBase, IPlotEngine
     {
         public PlotterNCP()
         {
@@ -23,7 +23,16 @@ namespace AspireApp.ApiService.Controllers
         public new void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
         {
             // Get Scales:
-            plotTemplate.FrameSize = new float[] { Constants.NUM_COLS * plotTemplate.StrokeWidth, Constants.NUM_ROWS * plotTemplate.StrokeWidth };            
+            plotTemplate.FrameSize = new float[] { Constants.NUM_COLS * plotTemplate.StrokeWidth, Constants.NUM_ROWS * plotTemplate.StrokeWidth };
+            // Set Axises:
+            if (plotTemplate.Axis[0].Range != null && plotTemplate.Axis[0].Range.Length == 3)
+            {
+                AxisValues[0] = plotTemplate.Axis[0].Range;
+            }
+            if (plotTemplate.Axis[1].Range != null && plotTemplate.Axis[1].Range.Length == 3)
+            {
+                AxisValues[1] = plotTemplate.Axis[1].Range;
+            }
             base.SetUpLayout(plotTemplate, plotItem);
         }
         /// <summary>
@@ -35,16 +44,17 @@ namespace AspireApp.ApiService.Controllers
         /// <param name="plotItem"></param>
         public new void DrawData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem)
         {
+            SetUpLayout(plotTemplate, plotItem);
+
             if (plotItem.ArrayData != null)
             {
-                var (x, y) = GetPoint0(plotTemplate);
-                SKPoint pointRef = new SKPoint(x, y);
+                // Preparing plot:
                 SKBitmap bitmap = new SKBitmap((int)plotTemplate.FrameSize[0], (int)plotTemplate.FrameSize[1]);
                 using var canvas = new SKCanvas(bitmap);
-
-                // Preparing plot:
+                var (x, y) = GetPoint0(plotTemplate);
+                SKPoint pointRef = new SKPoint(x, y);                
                 var color = SKColors.Black;
-                var arrayData = (double[,])plotItem.ArrayData!;
+                var arrayData = plotItem.ArrayData!;
                 var paintPoint = Constants.PaintPoint;
                 paintPoint.StrokeWidth = plotTemplate.StrokeWidth;
 
@@ -64,6 +74,8 @@ namespace AspireApp.ApiService.Controllers
             }
             else
                 SetNoData(plotTemplate, point, surface);
-        }        
+
+            base.DrawData(plotTemplate, point, surface, plotItem);
+        }
     }
 }

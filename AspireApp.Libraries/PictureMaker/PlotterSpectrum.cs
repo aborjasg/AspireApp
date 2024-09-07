@@ -1,5 +1,4 @@
-﻿using AspireApp.Libraries;
-using AspireApp.Libraries.Models;
+﻿using AspireApp.Libraries.Models;
 using AspireApp.ServiceDefaults.Shared;
 using SkiaSharp;
 using System;
@@ -8,24 +7,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AspireApp.ApiService.Controllers
+namespace AspireApp.Libraries.PictureMaker
 {
-    internal class PlotterSpectrum : PlotBase, IPlotEngine
+    public class PlotterSpectrum : PlotBase, IPlotEngine
     {
         public PlotterSpectrum()
         {
 
         }
 
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="plotTemplate"></param>
-        public new void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
-        {            
-            AxisValues = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
-
+        public  void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
+        {
             // Get ranges:
             if (plotTemplate.Axis[0].Range == null || plotTemplate.Axis[0].Range.Length == 0)
             {
@@ -57,7 +53,7 @@ namespace AspireApp.ApiService.Controllers
                     {
                         var arrX = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
                         var arrY = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
-                        
+
                         // Axis X  (auto-scaled if it's empty float[]):
                         int jumps = 5;
                         var (minX, maxX, baseX) = DataTransformation.AdjustLimits(arrX.Min(), arrX.Max(), jumps, true);
@@ -83,13 +79,16 @@ namespace AspireApp.ApiService.Controllers
         {
             if (plotItem.ArrayData != null)
             {
+                SetUpLayout(plotTemplate, plotItem);
+
+                // Preparing plot:
                 var (x, y) = GetPoint0(plotTemplate);
                 SKPoint pointRef = new SKPoint(x, y);
                 SKBitmap bitmap = new SKBitmap((int)plotTemplate.FrameSize[0], (int)plotTemplate.FrameSize[1]);
                 using var canvas = new SKCanvas(bitmap);
 
                 switch (plotTemplate.PlotType)
-                {                    
+                {
                     case enmPlotType.linechart:
                         {
                             var arrX = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
@@ -125,7 +124,7 @@ namespace AspireApp.ApiService.Controllers
                                 canvas.DrawPath(path, paint);
                                 canvas.DrawPoint(pointRef, Constants.PaintBack);
                                 path.Close();
-                            }                            
+                            }
                             break;
                         }
                     case enmPlotType.histogram:
@@ -136,11 +135,11 @@ namespace AspireApp.ApiService.Controllers
                             var paintPoint = new SKPaint { Color = color, FilterQuality = SKFilterQuality.High, StrokeWidth = plotTemplate.StrokeWidth };
                             var arrX = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
                             var arrY = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
-                            
+
                             for (int k = 0; k < arrX.Length; k++)
-                            {                               
+                            {
                                 var refX = (arrX[k] - AxisValues![0][0]) * plotTemplate.Axis[0].Scale;
-                                var refY = (arrY[k] - AxisValues[1][0]) * plotTemplate.Axis[1].Scale;                               
+                                var refY = (arrY[k] - AxisValues[1][0]) * plotTemplate.Axis[1].Scale;
                                 px = (float)(refX + plotTemplate.Axis[0].Offset[0]);
                                 py0 = (float)(plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0]);
                                 py1 = (float)(py0 - refY);
@@ -155,6 +154,8 @@ namespace AspireApp.ApiService.Controllers
             }
             else
                 SetNoData(plotTemplate, point, surface);
+
+            base.DrawData(plotTemplate, point, surface, plotItem);
         }
     }
 }

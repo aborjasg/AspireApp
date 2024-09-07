@@ -1,0 +1,16 @@
+﻿using AspireApp.Libraries.Models;
+using SkiaSharp;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AspireApp.Libraries.PictureMaker
+{
+    public interface IPlotEngine
+    {
+        void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, string addToTitle = "");        
+        void DrawData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem);
+    }
+}

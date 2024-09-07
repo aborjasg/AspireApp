@@ -723,7 +723,7 @@ namespace AspireApp.Libraries
                 if (max % base10 != 0)
                 {
                     var diff = max % base10;
-                    resultMax = max - diff != 0 ? max - diff : max;
+                    resultMax = max - diff != 0 ? (max - diff) : max;
 
                     if (max > 0 && Math.Abs(diff / base10) >= 0.2 && Math.Abs(diff / base10) < 1)
                     {

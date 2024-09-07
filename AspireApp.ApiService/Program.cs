@@ -1,9 +1,8 @@
-using AspireApp.ApiService;
-using AspireApp.ApiService.Controllers;
 using AspireApp.ApiService.DataAccess;
 using AspireApp.Libraries;
 using AspireApp.Libraries.Enums;
 using AspireApp.Libraries.Models;
+using AspireApp.Libraries.PictureMaker;
 using AspireApp.ServiceDefaults.Shared;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
@@ -48,6 +47,7 @@ app.MapPost("/processData", (ConnectionString connectionString, RunImage record)
         {
             enmTestType.ncps => new PlotterNCP(),
             enmTestType.spectrum => new PlotterSpectrum(),
+            enmTestType.energy_cal => new PlotterEnergy(),
             _ => null
         };
         var pictureEngine = new PictureEngine(template, derivedData, plotEngine!);
