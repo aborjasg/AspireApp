@@ -68,7 +68,7 @@
       {
         "Name": "histogram",
         "Title": "Histogram (Plot)",
-        "PlotType": "histogram",
+        "PlotType": "histogram1",
         "AreaLayout": "Plain",
         "FrameSize": [ 320, 240 ],
         "FrameSpace": [],
@@ -90,21 +90,21 @@
     ]
   },
   {
-    "Name": "energy_cal",
-    "Title": "Energy Calibration (Picture)",
-    "PictureDimensions": [ 760, 280 ],
-    "PictureLayout": [ 0, 0 ],
+    "Name": "energy",
+    "Title": "Energy/Electrical (Picture)",
+    "PictureDimensions": [ 820, 280 ],
+    "PictureLayout": [ 2, 1 ],
     "PicturePreviewFlag": true,
     "PicturePreviewPath": "C:\\Redlen\\Plots\\",
     "StartPoint": [ 20, 20 ],
-    "PlotSpacing": [ 10, 10 ],
+    "PlotSpacing": [ 40, 10 ],
     "PlotTemplates": [
       {
         "Name": "heatmap",
         "Title": "Heatmap (Plot)",
         "PlotType": "heatmap",
         "AreaLayout": "Plain",
-        "FrameSize": [ 360, 240 ],
+        "FrameSize": [ ],
         "FrameSpace": [],
         "StrokeWidth": 10,
         "Axis": [
@@ -121,12 +121,12 @@
         ],
         "Bar": {
           "Point": [
-            340,
-            50
+            390,
+            20
           ],
           "Size": [
-            8,
-            192
+            10,
+            240
           ],
           "Colors": [],
           "ColorPositions": [],
@@ -139,14 +139,15 @@
           "Offset": [
             0,
             0
-          ]
+          ],
+          "Active": true
         },
         "Active": true
       },
       {
         "Name": "histogram",
         "Title": "Histogram (Plot)",
-        "PlotType": "histogram",
+        "PlotType": "histogram2",
         "AreaLayout": "Plain",
         "FrameSize": [ 320, 240 ],
         "FrameSpace": [10, 0],
@@ -183,7 +184,8 @@
           "Offset": [
             0,
             0
-          ]
+          ],
+          "Active": false
         },
         "Active": true
       }

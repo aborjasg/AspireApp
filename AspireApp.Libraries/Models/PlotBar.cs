@@ -36,5 +36,9 @@ namespace AspireApp.Libraries.Models
         /// 
         /// </summary>
         public bool[] Edges { get; set; } = [];
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool Active { get; set; } = true;
     }
 }

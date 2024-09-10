@@ -63,14 +63,14 @@ namespace AspireApp.Libraries.PictureMaker
                         var arrData1 = FakeData.GetLineChartData();
                         var arrData2 = FakeData.GetHistogramData();
                         result.Add(new PlotItem() { Name = enmPlotType.linechart.ToString(), ArrayData = arrData1, PointRef = template.StartPoint, IndexRef = [0, 0] });
-                        result.Add(new PlotItem() { Name = enmPlotType.histogram.ToString(), ArrayData = arrData2, PointRef = [template.StartPoint[0] + template.PlotSpacing[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
+                        result.Add(new PlotItem() { Name = enmPlotType.histogram1.ToString(), ArrayData = arrData2, PointRef = [template.StartPoint[0] + template.PlotSpacing[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
                         break;
                     }
-                case enmTestType.energy_cal: case enmTestType.electrical:
+                case enmTestType.energy: case enmTestType.electrical:
                     {
                         var arrData = FakeData.GetHeatMapData();
                         result.Add(new PlotItem() { Name = enmPlotType.heatmap.ToString(), ArrayData = arrData, PointRef = template.StartPoint, IndexRef = [0, 0] });
-                        result.Add(new PlotItem() { Name = enmPlotType.histogram.ToString(), ArrayData = arrData, PointRef = [template.StartPoint[0] + template.PlotSpacing[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
+                        result.Add(new PlotItem() { Name = enmPlotType.histogram2.ToString(), ArrayData = arrData, PointRef = [template.StartPoint[0] + template.PlotSpacing[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
                         break;
                     }
             }

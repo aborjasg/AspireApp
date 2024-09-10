@@ -42,17 +42,18 @@ app.MapPost("/processData", (ConnectionString connectionString, RunImage record)
     {
         var derivedData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(record.DataSource))!;
         var dataEngine = new DataSourceEngine(derivedData.Name);
-        var template = dataEngine.GetPictureTemplate();
+        var pictureTemplate = dataEngine.GetPictureTemplate();
         IPlotEngine? plotEngine = Enum.Parse<enmTestType>(derivedData.Name) switch
         {
             enmTestType.ncps => new PlotterNCP(),
             enmTestType.spectrum => new PlotterSpectrum(),
-            enmTestType.energy_cal => new PlotterEnergy(),
+            enmTestType.energy => new PlotterEnergy(),
+            enmTestType.uniformity => new PlotterUniformity(),
             _ => null
         };
-        var pictureEngine = new PictureEngine(template, derivedData, plotEngine!);
+        var pictureEngine = new PictureEngine(pictureTemplate, derivedData, plotEngine!);
         var image = pictureEngine.MakePicture()!;
-        var metadata = new RunMetadata(derivedData.Name, template);
+        var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
         return new RunImage(derivedData.Name, metadata, derivedData, image);        
     }
     else

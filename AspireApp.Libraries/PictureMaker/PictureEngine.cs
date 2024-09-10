@@ -58,12 +58,17 @@ namespace AspireApp.Libraries.PictureMaker
         public PictureEngine(PictureTemplate pictureTemplate, DerivedData derivedData, IPlotEngine plotEngine)
         {
             Guid = Guid.NewGuid();
-            this.pictureTemplate = pictureTemplate;
-            ImageInfo = new SKImageInfo(pictureTemplate.PictureDimensions[0], pictureTemplate.PictureDimensions[1]);
-            Surface = SKSurface.Create(ImageInfo);
-            Surface.Canvas.Clear(SKColors.White);
-            this.derivedData = derivedData;
-            this.plotEngine = plotEngine;
+            if (pictureTemplate != null)
+            {
+                this.pictureTemplate = pictureTemplate;
+                ImageInfo = new SKImageInfo(pictureTemplate.PictureDimensions[0], pictureTemplate.PictureDimensions[1]);
+                Surface = SKSurface.Create(ImageInfo);
+                Surface.Canvas.Clear(SKColors.White);
+                this.derivedData = derivedData;
+                this.plotEngine = plotEngine;
+            }
+            else
+                throw new Exception("PictureTemplate invalid,");
         }
 
         #region Protected/Private Methods
@@ -85,15 +90,12 @@ namespace AspireApp.Libraries.PictureMaker
 
             if (plotTemplate != null)
             {
-                //// Draw layout:
-                //plotEngine.SetUpLayout(plotTemplate, plotItem);
-                //plotEngine.DrawLayout(plotTemplate, pointRef, Surface);
+                // Draw array data:
+                plotEngine.DrawData(plotTemplate, pointRef, Surface, plotItem);
 
                 // Set Plot Title:
                 plotEngine.DrawPlotTitle(plotTemplate, pointRef, Surface, plotItem.IndexRef.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty);
 
-                // Draw array data:
-                plotEngine.DrawData(plotTemplate, pointRef, Surface, plotItem);
             }
         }
         /// <summary>

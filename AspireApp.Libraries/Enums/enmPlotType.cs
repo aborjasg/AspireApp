@@ -17,7 +17,11 @@
         /// <summary>
         ///  blue bars
         /// </summary>
-        histogram = 2,
+        histogram1 = 21,
+        /// <summary>
+        /// 
+        /// </summary>
+        histogram2 = 22,
         /// <summary>
         ///  gray and red lines 
         /// </summary>
