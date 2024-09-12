@@ -104,7 +104,7 @@
         "Title": "Heatmap (Plot)",
         "PlotType": "heatmap",
         "AreaLayout": "Plain",
-        "FrameSize": [ ],
+        "FrameSize": [],
         "FrameSpace": [],
         "StrokeWidth": 10,
         "Axis": [
@@ -120,10 +120,8 @@
           }
         ],
         "Bar": {
-          "Point": [
-            390,
-            20
-          ],
+          "Orientation": "Vertical",
+          "Spacing": [ 30, 0 ],
           "Size": [
             10,
             240
@@ -150,7 +148,7 @@
         "PlotType": "histogram2",
         "AreaLayout": "Plain",
         "FrameSize": [ 320, 240 ],
-        "FrameSpace": [10, 0],
+        "FrameSpace": [ 10, 0 ],
         "StrokeWidth": 20,
         "Axis": [
           {
@@ -187,6 +185,40 @@
           ],
           "Active": false
         },
+        "Active": true
+      }
+    ]
+  },
+  {
+    "Name": "energy_cal",
+    "Title": "Energy Calibration (Picture)",
+    "PictureDimensions": [ 380, 280 ],
+    "PictureLayout": [ 0, 0 ],
+    "PicturePreviewFlag": true,
+    "PicturePreviewPath": "C:\\Redlen\\Plots\\",
+    "StartPoint": [ 40, 20 ],
+    "PlotSpacing": [ 10, 10 ],
+    "PlotTemplates": [
+      {
+        "Name": "Curve Chart",
+        "Title": "Curve Chart (Plot)",
+        "PlotType": "curvechart",
+        "AreaLayout": "Plain",
+        "FrameSize": [ 320, 240 ],
+        "FrameSpace": [],
+        "StrokeWidth": 2,
+        "Axis": [
+          {
+            "Label": "X",
+            "Range": [ -10, 10, 1 ],
+            "Offset": [ 0, 0 ]
+          },
+          {
+            "Label": "Y",
+            "Range": [ -10, 10, 1 ],
+            "Offset": [ 0, 0 ]
+          }
+        ],
         "Active": true
       }
     ]

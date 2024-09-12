@@ -10,6 +10,7 @@ namespace AspireApp.Libraries.PictureMaker
 {
     public interface IPlotEngine
     {
+        void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem);
         void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, string addToTitle = "");        
         void DrawData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem);
     }

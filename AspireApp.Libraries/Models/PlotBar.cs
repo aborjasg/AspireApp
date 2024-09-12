@@ -1,13 +1,15 @@
-﻿using SkiaSharp;
+﻿using AspireApp.ServiceDefaults.Shared;
+using SkiaSharp;
 
 namespace AspireApp.Libraries.Models
 {
     public class PlotBar
     {
+        public enmTextOrientation Orientation { get; set;  }
         /// <summary>
         /// 
         /// </summary>
-        public int[] Point { get; set; } = [];
+        public int[] Spacing { get; set; } = [];
         /// <summary>
         /// 
         /// </summary>

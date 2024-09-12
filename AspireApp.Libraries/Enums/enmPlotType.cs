@@ -25,7 +25,11 @@
         /// <summary>
         ///  gray and red lines 
         /// </summary>
-        linechart = 3,
+        linechart = 31,
+        /// <summary>
+        /// 
+        /// </summary>
+        curvechart = 32,
         /// <summary>
         /// 
         /// </summary>

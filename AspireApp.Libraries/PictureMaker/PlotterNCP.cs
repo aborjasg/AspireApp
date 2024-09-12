@@ -26,18 +26,5 @@ namespace AspireApp.Libraries.PictureMaker
             plotTemplate.FrameSize = new float[] { Constants.NUM_COLS * plotTemplate.StrokeWidth, Constants.NUM_ROWS * plotTemplate.StrokeWidth };
             base.SetUpLayout(plotTemplate, plotItem);
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="plotTemplate"></param>
-        /// <param name="point"></param>
-        /// <param name="surface"></param>
-        /// <param name="plotItem"></param>
-        public new void DrawData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem)
-        {
-            SetUpLayout(plotTemplate, plotItem);
-            base.DrawData(plotTemplate, point, surface, plotItem);
-        }
     }
 }

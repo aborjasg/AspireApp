@@ -38,26 +38,35 @@ app.MapPost("/getSourceData",  (ConnectionString connectionString, DerivedDataFi
 
 app.MapPost("/processData", (ConnectionString connectionString, RunImage record) =>
 {
-    if (!string.IsNullOrEmpty(record.DataSource))
+    try
     {
-        var derivedData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(record.DataSource))!;
-        var dataEngine = new DataSourceEngine(derivedData.Name);
-        var pictureTemplate = dataEngine.GetPictureTemplate();
-        IPlotEngine? plotEngine = Enum.Parse<enmTestType>(derivedData.Name) switch
+        if (!string.IsNullOrEmpty(record.DataSource))
         {
-            enmTestType.ncps => new PlotterNCP(),
-            enmTestType.spectrum => new PlotterSpectrum(),
-            enmTestType.energy => new PlotterEnergy(),
-            enmTestType.uniformity => new PlotterUniformity(),
-            _ => null
-        };
-        var pictureEngine = new PictureEngine(pictureTemplate, derivedData, plotEngine!);
-        var image = pictureEngine.MakePicture()!;
-        var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
-        return new RunImage(derivedData.Name, metadata, derivedData, image);        
+            var derivedData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(record.DataSource))!;
+            var dataEngine = new DataSourceEngine(derivedData.Name);
+            var pictureTemplate = dataEngine.GetPictureTemplate();
+            IPlotEngine? plotEngine = Enum.Parse<enmTestType>(derivedData.Name) switch
+            {
+                enmTestType.ncps => new PlotterNCP(),
+                enmTestType.spectrum => new PlotterSpectrum(),
+                enmTestType.energy => new PlotterEnergy(),
+                enmTestType.energy_cal => new PlotterEnergyCal(),
+                enmTestType.uniformity => new PlotterUniformity(),
+                _ => null
+            };
+            var pictureEngine = new PictureEngine(pictureTemplate, derivedData, plotEngine!);
+            var image = pictureEngine.MakePicture()!;
+            var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
+            return new RunImage(derivedData.Name, metadata, derivedData, image);
+        }
+        else
+            throw new Exception("DataSource invalid");
     }
-    else
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.ToString());
         return new RunImage();
+    }
 });
 
 app.MapPost("/saveRunImage", (ConnectionString connectionString, RunImage record) =>

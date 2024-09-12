@@ -73,6 +73,11 @@ namespace AspireApp.Libraries.PictureMaker
                         result.Add(new PlotItem() { Name = enmPlotType.histogram2.ToString(), ArrayData = arrData, PointRef = [template.StartPoint[0] + template.PlotSpacing[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
                         break;
                     }
+                case enmTestType.energy_cal:
+                    {
+                        result.Add(new PlotItem() { Name = enmPlotType.curvechart.ToString(), ArrayData = FakeData.GetEnergyCal_XrayRaw(), PointRef = template.StartPoint, IndexRef = [0, 0] });
+                        break;
+                    }
             }
             return result;
         }

@@ -23,7 +23,7 @@ namespace AspireApp.Libraries.PictureMaker
         /// 
         /// </summary>
         /// <param name="plotTemplate"></param>
-        protected new void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
+        public new void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
         { 
             switch (plotTemplate.PlotType)
             {
@@ -45,19 +45,6 @@ namespace AspireApp.Libraries.PictureMaker
                     }
             }
             base.SetUpLayout(plotTemplate, plotItem);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="plotTemplate"></param>
-        /// <param name="point"></param>
-        /// <param name="surface"></param>
-        /// <param name="plotItem"></param>
-        public new void DrawData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem)
-        {
-            SetUpLayout(plotTemplate, plotItem);
-            base.DrawData(plotTemplate, point, surface, plotItem);
         }
     }
 }

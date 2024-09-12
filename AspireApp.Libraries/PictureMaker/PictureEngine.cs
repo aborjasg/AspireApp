@@ -90,10 +90,11 @@ namespace AspireApp.Libraries.PictureMaker
 
             if (plotTemplate != null)
             {
+                // Preparing plot layout:
+                plotEngine.SetUpLayout(plotTemplate, plotItem);
                 // Draw array data:
                 plotEngine.DrawData(plotTemplate, pointRef, Surface, plotItem);
-
-                // Set Plot Title:
+                // Set plot title:
                 plotEngine.DrawPlotTitle(plotTemplate, pointRef, Surface, plotItem.IndexRef.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty);
 
             }
@@ -144,7 +145,7 @@ namespace AspireApp.Libraries.PictureMaker
             // Download image:            
             if (pictureTemplate.PicturePreviewFlag)
             {
-                string filePath = $"{pictureTemplate.PicturePreviewPath}{Guid}.png";
+                string filePath = $"{pictureTemplate.PicturePreviewPath}{pictureTemplate.Name}_{Guid}.png";
                 File.WriteAllBytes(filePath, image);
             }
             return "data:image/png;base64, " + Convert.ToBase64String(image);
