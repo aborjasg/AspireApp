@@ -1,6 +1,7 @@
 ﻿using AspireApp.Libraries.Models;
 using AspireApp.ServiceDefaults.Shared;
 using MathNet.Numerics.Statistics;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using SkiaSharp;
 using System;
 using System.ComponentModel;
@@ -524,45 +525,48 @@ namespace AspireApp.Libraries.PictureMaker
                             }
                         case enmPlotType.curvechart:
                             {
+                                AxisValues = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
                                 List<double> listMinX = new List<double>(), listMaxX = new List<double>(), listMinY = new List<double>(), listMaxY = new List<double>();
-                                int numBins = 6, threshStart = 30, threshEnd = 1 + threshStart - 1, threshStep = 1, numThresh = plotItem.ArrayData.GetLength(0), windowLength = 17, polyOrder = 3;
-                                Array binThreshList = ArrayExtensions.GetBinThreshList(numBins, threshStart, threshEnd, threshStep, numThresh);
-
+                                int jumps = 6, numBins = 6, numThresh = plotItem.ArrayData.GetLength(1), threshStart = 30, threshEnd = numThresh + threshStart - 1, threshStep = 1, windowLength = 17, polyOrder = 3;
+                                var binThreshList = ArrayExtensions.GetBinThreshList(numBins, threshStart, threshEnd, threshStep, numThresh);
+                                
                                 for (int k=0; k< numThresh; k++)
-                                {  
-                                    var arrX = (int[])binThreshList.PartOf(new SliceIndex?[] { new SliceIndex(k), null });
+                                {
+                                    var arrX = (int[])binThreshList.PartOf(new object?[] { new SliceIndex(k), null });
+                                    if (arrX != null)
+                                    {
+                                        var (minValue, maxValue) = DataTransformation.GetLimits(arrX);
+                                        listMinX.Add(minValue);
+                                        listMaxX.Add(maxValue);
+                                    }
+                                    else
+                                    {
+                                        throw new Exception("arrX empty");
+                                    }
+
                                     var arrY = (double[])plotItem.ArrayData.PartOf(new SliceIndex?[] { new SliceIndex(k), null });
 
-                                    if (arrX != null && arrY != null)
+                                    if (arrY != null)
                                     {
-                                        var (minKey, maxKey) = DataTransformation.GetLimits(arrX);
-                                        listMinX.Add(minKey);
-                                        listMaxX.Add(maxKey);
-
                                         var (minValue, maxValue) = DataTransformation.GetLimits(arrY);
                                         listMinY.Add(minValue);
                                         listMaxY.Add(maxValue);
                                     }
                                     else
                                     {
-                                        throw new Exception("Lists empty");
+                                        throw new Exception("arrY empty");
                                     }
                                 }
 
-                                AxisValues = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
-
-                                // Axis X  (auto-scaled if it's empty float[]):
-                                int jumps = 5;
+                                // Axis X  (auto-scaled if it's empty float[]):                                    
                                 var (minX, maxX, baseX) = DataTransformation.AdjustLimits(listMinX.Min(), listMaxX.Max(), jumps, true);
                                 AxisValues[0] = new double[] { minX, maxX, baseX };
-
                                 // Axis Y (auto-scaled if it's empty float[]):
                                 var (minY, maxY, baseY) = DataTransformation.AdjustLimits(listMinY.Min(), listMaxY.Max(), jumps, true);
                                 AxisValues[1] = new double[] { minY, maxY, baseY };
                                 SetScaleLayout(plotTemplate, plotItem);
 
-                                // Preparing plot:
-                                var brushIndex = 0;
+                                // Preparing plot:j
                                 var paint = new SKPaint()
                                 {
                                     IsAntialias = true,
@@ -581,7 +585,7 @@ namespace AspireApp.Libraries.PictureMaker
                                     List<SKPoint> points = new List<SKPoint>();
 
                                     // Paint:
-                                    paint.Color = Constants.Brushes[brushIndex];
+                                    paint.Color = Constants.Brushes[j];
 
                                     // Path:
                                     var path = new SKPath();
@@ -592,7 +596,7 @@ namespace AspireApp.Libraries.PictureMaker
 
                                     for (int i = 0; i < arrY.Length; i++)
                                     {
-                                        px = (float)(pointRef.X + (arrY[i] - AxisValues[0][0]) * plotTemplate.Axis[0].Scale);
+                                        px = (float)(pointRef.X + (threshStart + i - AxisValues[0][0]) * plotTemplate.Axis[0].Scale);
                                         py = (float)(pointRef.Y - (arrY[i] - AxisValues[1][0]) * plotTemplate.Axis[1].Scale);
 
                                         if (i == 0)
@@ -605,8 +609,6 @@ namespace AspireApp.Libraries.PictureMaker
                                     canvas.DrawPath(path, paint);
 
                                     path.Close();
-
-                                    brushIndex++;
                                 }
                                 surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
                                 break;

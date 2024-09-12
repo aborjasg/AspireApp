@@ -210,13 +210,13 @@
         "Axis": [
           {
             "Label": "X",
-            "Range": [ -10, 10, 1 ],
-            "Offset": [ 0, 0 ]
+            "Range": [ 0, 0, 1 ],
+            "Offset": [ 20, 20 ]
           },
           {
             "Label": "Y",
-            "Range": [ -10, 10, 1 ],
-            "Offset": [ 0, 0 ]
+            "Range": [ 0, 0, 1 ],
+            "Offset": [ 0, 10 ]
           }
         ],
         "Active": true
