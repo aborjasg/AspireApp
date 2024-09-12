@@ -13,7 +13,6 @@ namespace AspireApp.Libraries.Models
         /// <summary>
         /// 
         /// </summary>
-        public string Title { get; set; } = "";
         public enmTestType TestType;
         /// <summary>
         /// 

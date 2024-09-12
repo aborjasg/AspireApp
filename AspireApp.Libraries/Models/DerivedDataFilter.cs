@@ -1,4 +1,6 @@
-﻿namespace AspireApp.Libraries.Models
+﻿using AspireApp.Libraries.Enums;
+
+namespace AspireApp.Libraries.Models
 {
     /// <summary>
     /// 

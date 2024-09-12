@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using AspireApp.Libraries.Models
+@using AspireApp.Libraries.Enums
 @using AspireApp.ServiceDefaults.Shared
 @using Newtonsoft.Json;
 
@@ -36,7 +37,7 @@ else
     {
         
         // getDerivedData:
-        response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined_NCP", TestType = "Combined_NCP" });
+        response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined_NCP", TestType = "ncps" });
         deriveData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(response.Content))!;
 
         // processData:

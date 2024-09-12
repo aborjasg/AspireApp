@@ -31,7 +31,7 @@ app.UseExceptionHandler();
 
 app.MapPost("/getSourceData",  (ConnectionString connectionString, DerivedDataFilter filter) =>
 {    
-    var engine = new DataSourceEngine(filter.Name);
+    var engine = new DataSourceEngine(filter.Name, Enum.Parse<enmTestType>(filter.TestType));
     var result = engine.GetDerivedData();
     return new ActionResponse() { Type = "Information", Message = "OK", Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(result)) };
 });
@@ -43,9 +43,9 @@ app.MapPost("/processData", (ConnectionString connectionString, RunImage record)
         if (!string.IsNullOrEmpty(record.DataSource))
         {
             var derivedData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(record.DataSource))!;
-            var dataEngine = new DataSourceEngine(derivedData.Name);
+            var dataEngine = new DataSourceEngine(derivedData.Name, derivedData.TestType);
             var pictureTemplate = dataEngine.GetPictureTemplate();
-            IPlotEngine? plotEngine = Enum.Parse<enmTestType>(derivedData.Name) switch
+            IPlotEngine? plotEngine = derivedData.TestType switch
             {
                 enmTestType.ncps => new PlotterNCP(),
                 enmTestType.spectrum => new PlotterSpectrum(),

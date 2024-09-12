@@ -1,7 +1,7 @@
 [
   {
-    "Name": "ncps",
-    "Title": "Combined NCP (Picture)",
+    "Name": "Combined NCP (Picture)",
+    "TestType": "ncps",
     "PictureDimensions": [ 640, 960 ],
     "PictureLayout": [ 2, 4 ],
     "PicturePreviewFlag": true,
@@ -34,8 +34,8 @@
     ]
   },
   {
-    "Name": "spectrum",
-    "Title": "Spectrum (Picture)",
+    "Name": "Spectrum (Picture)",
+    "TestType": "spectrum",
     "PictureDimensions": [ 720, 280 ],
     "PictureLayout": [ 0, 0 ],
     "PicturePreviewFlag": true,
@@ -90,8 +90,8 @@
     ]
   },
   {
-    "Name": "energy",
-    "Title": "Energy/Electrical (Picture)",
+    "Name": "Energy/Electrical (Picture)",
+    "TestType": "energy",
     "PictureDimensions": [ 820, 280 ],
     "PictureLayout": [ 2, 1 ],
     "PicturePreviewFlag": true,
@@ -190,9 +190,9 @@
     ]
   },
   {
-    "Name": "energy_cal",
-    "Title": "Energy Calibration (Picture)",
-    "PictureDimensions": [ 380, 280 ],
+    "Name": "Energy Calibration (Picture)",
+    "TestType": "energy_cal",
+    "PictureDimensions": [ 1140, 280 ],
     "PictureLayout": [ 0, 0 ],
     "PicturePreviewFlag": true,
     "PicturePreviewPath": "C:\\Redlen\\Plots\\",

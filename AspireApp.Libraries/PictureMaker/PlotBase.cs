@@ -663,9 +663,9 @@ namespace AspireApp.Libraries.PictureMaker
         /// <param name="point"></param>
         /// <param name="surface"></param>
         /// <param name="addToTitle"></param>
-        public void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, string addToTitle = "")
+        public void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem, string addToTitle = "")
         {
-            surface.Canvas.DrawText(plotTemplate.Title + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
+            surface.Canvas.DrawText(plotItem.Name + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
         }
         /// <summary>
         /// 

@@ -85,9 +85,7 @@ namespace AspireApp.Libraries.PictureMaker
             PlotTemplate? plotTemplate = null;
             var pointRef = new SKPoint(plotItem.PointRef[0], ImageInfo.Height - plotItem.PointRef[1]);
 
-            if (!string.IsNullOrEmpty(plotItem.Name))
-                plotTemplate = pictureTemplate.PlotTemplates.Where(x => x.PlotType.ToString() == plotItem.Name)!.FirstOrDefault();
-
+            plotTemplate = pictureTemplate.PlotTemplates.Where(x => x.PlotType == plotItem.PlotType)!.FirstOrDefault();
             if (plotTemplate != null)
             {
                 // Preparing plot layout:
@@ -95,7 +93,7 @@ namespace AspireApp.Libraries.PictureMaker
                 // Draw array data:
                 plotEngine.DrawData(plotTemplate, pointRef, Surface, plotItem);
                 // Set plot title:
-                plotEngine.DrawPlotTitle(plotTemplate, pointRef, Surface, plotItem.IndexRef.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty);
+                plotEngine.DrawPlotTitle(plotTemplate, pointRef, Surface, plotItem, plotItem.IndexRef.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty);
 
             }
         }
@@ -131,7 +129,7 @@ namespace AspireApp.Libraries.PictureMaker
         /// </summary>
         public void DrawPictureTitle()
         {
-            Surface.Canvas.DrawText(pictureTemplate.Title, pictureTemplate.PictureDimensions[0] / 2f, pictureTemplate.StartPoint[1] - 20, Constants.PaintTitle);
+            Surface.Canvas.DrawText(pictureTemplate.Name, pictureTemplate.PictureDimensions[0] / 2f, pictureTemplate.StartPoint[1] - 20, Constants.PaintTitle);
         }
 
         /// <summary>
@@ -145,7 +143,7 @@ namespace AspireApp.Libraries.PictureMaker
             // Download image:            
             if (pictureTemplate.PicturePreviewFlag)
             {
-                string filePath = $"{pictureTemplate.PicturePreviewPath}{pictureTemplate.Name}_{Guid}.png";
+                string filePath = $"{pictureTemplate.PicturePreviewPath}{pictureTemplate.TestType}_{Guid}.png";
                 File.WriteAllBytes(filePath, image);
             }
             return "data:image/png;base64, " + Convert.ToBase64String(image);
