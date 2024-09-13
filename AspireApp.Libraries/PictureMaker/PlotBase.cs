@@ -45,7 +45,7 @@ namespace AspireApp.Libraries.PictureMaker
         /// </summary>
         protected void SetNoData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface)
         {
-            surface.Canvas.DrawText("No data", new SKPoint(point.X + plotTemplate.FrameSize[0] / 2 - 20, point.Y - plotTemplate.FrameSize[1] / 2), Constants.PaintText);
+            surface.Canvas.DrawText("N/A", new SKPoint(point.X + plotTemplate.FrameSize[0] / 2 - 20, point.Y - plotTemplate.FrameSize[1] / 2), Constants.PaintText);
         }        
         /// <summary>
         /// 
@@ -146,7 +146,7 @@ namespace AspireApp.Libraries.PictureMaker
         {
             SKPaint paint = Constants.PaintTextSmall.Clone();
 
-            if (AxisValues != null)
+            if (AxisValues != null && plotTemplate.IsAxisVisible)
             {
                 string numDecimals = "0";
                 if (AxisValues[0][2] < 1) numDecimals = AxisValues[0][2] <= 0.25 ? "0.00" : "0.0";
@@ -184,7 +184,7 @@ namespace AspireApp.Libraries.PictureMaker
         /// <param name="edges"></param>
         protected void DrawBar(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, bool[]? edges = null)
         {
-            if (plotTemplate.Bar != null && AxisValues != null)
+            if (plotTemplate.Bar != null && AxisValues != null && plotTemplate.IsAxisVisible)
             {
                 if (plotTemplate.Bar.Active)
                 {
@@ -654,6 +654,7 @@ namespace AspireApp.Libraries.PictureMaker
             {
                 AxisValues[1] = plotTemplate.Axis[1].Range;
             }
+
             SetScaleLayout(plotTemplate, plotItem);
         }
         /// <summary>
@@ -664,8 +665,9 @@ namespace AspireApp.Libraries.PictureMaker
         /// <param name="surface"></param>
         /// <param name="addToTitle"></param>
         public void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem, string addToTitle = "")
-        {
-            surface.Canvas.DrawText(plotItem.Name + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
+        {            
+            if(plotTemplate.IsTitleVisible)
+                surface.Canvas.DrawText(plotItem.Name + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
         }
         /// <summary>
         /// 

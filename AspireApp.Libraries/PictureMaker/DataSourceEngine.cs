@@ -36,7 +36,7 @@ namespace AspireApp.Libraries.PictureMaker
         /// <param name="testType"></param>
         /// <param name="template"></param>
         /// <returns></returns>
-        private List<PlotItem> GetDataSource(enmTestType testType, PictureTemplate template)
+        private List<PlotItem> GetDataSource(enmTestType testType, PictureTemplate pictureTemplate)
         {
             var result = new List<PlotItem>();
             switch (testType)
@@ -45,17 +45,10 @@ namespace AspireApp.Libraries.PictureMaker
                     {
                         var random = new Random();
                         // Preparing data sample:
-                        for (int j = 0; j < template.PictureLayout[1]; j++)
-                            for (int i = 0; i < template.PictureLayout[0]; i++)
-                            {
-                                double[,]? arrData;
-                                if (i == 0 && j == 0) // For testing purposes
-                                    arrData = null;
-                                else
-                                    arrData = FakeData.GetNcpData();
-
-                                result.Add(new PlotItem() { Name = "Combined NCPs", PlotType = enmPlotType.ncp, ArrayData = arrData!, PointRef = [template.StartPoint[0] + i * (288 + template.PlotSpacing[0]), template.StartPoint[1] + j * (192 + template.PlotSpacing[1])], IndexRef = [i, j] });
-                            }
+                        for (int j = 0; j < pictureTemplate.PictureLayout[1]; j++)
+                            for (int i = 0; i < pictureTemplate.PictureLayout[0]; i++)                            
+                                result.Add(new PlotItem() { Name = "Combined NCPs", PlotType = enmPlotType.ncp, ArrayData = FakeData.GetNcpData(), IndexRef = [i, j] });
+                            
                         break;
                     }
                 case enmTestType.spectrum:
@@ -75,9 +68,9 @@ namespace AspireApp.Libraries.PictureMaker
                     }
                 case enmTestType.energy_cal:
                     {
-                        result.Add(new PlotItem() { Name = "XRAY-RAW-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayRaw(), PointRef = template.StartPoint, IndexRef = [0, 0] });
-                        result.Add(new PlotItem() { Name = "XRAY-PB-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayPB(), PointRef = [template.StartPoint[0] + template.PictureDimensions[0] / 3, template.StartPoint[1]], IndexRef = [0, 1] });
-                        result.Add(new PlotItem() { Name = "XRAY-CEO2-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayCEO2(), PointRef = [template.StartPoint[0] + ( template.PictureDimensions[0] / 3) * 2, template.StartPoint[1]], IndexRef = [0, 2] });
+                        result.Add(new PlotItem() { Name = "XRAY-RAW-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayRaw(), PointRef = pictureTemplate.StartPoint, IndexRef = [0, 0] });
+                        result.Add(new PlotItem() { Name = "XRAY-PB-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayPB(), PointRef = [pictureTemplate.StartPoint[0] + pictureTemplate.PictureDimensions[0] / 3, pictureTemplate.StartPoint[1]], IndexRef = [0, 1] });
+                        result.Add(new PlotItem() { Name = "XRAY-CEO2-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayCEO2(), PointRef = [pictureTemplate.StartPoint[0] + (pictureTemplate.PictureDimensions[0] / 3) * 2, pictureTemplate.StartPoint[1]], IndexRef = [0, 2] });
                         break;
                     }
             }

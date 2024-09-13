@@ -85,15 +85,21 @@ namespace AspireApp.Libraries.PictureMaker
             PlotTemplate? plotTemplate = null;
             var pointRef = new SKPoint(plotItem.PointRef[0], ImageInfo.Height - plotItem.PointRef[1]);
 
-            plotTemplate = pictureTemplate.PlotTemplates.Where(x => x.PlotType == plotItem.PlotType)!.FirstOrDefault();
+            plotTemplate = pictureTemplate.PlotTemplates.Where(x => x.PlotType == plotItem.PlotType && x.Active==true)!.FirstOrDefault();
             if (plotTemplate != null)
             {
+                // Calculate Point Ref:
+                if (plotItem.IndexRef != null)
+                {
+                    plotItem.PointRef = new int[] { pictureTemplate.StartPoint[0] + (pictureTemplate.PictureDimensions[0] / pictureTemplate.PictureLayout[0]) * plotItem.IndexRef[0], pictureTemplate.StartPoint[1] + (pictureTemplate.PictureDimensions[1] / pictureTemplate.PictureLayout[1]) * plotItem.IndexRef[1] };
+                    pointRef = new SKPoint(plotItem.PointRef[0], ImageInfo.Height - plotItem.PointRef[1]);
+                }
                 // Preparing plot layout:
                 plotEngine.SetUpLayout(plotTemplate, plotItem);
                 // Draw array data:
                 plotEngine.DrawData(plotTemplate, pointRef, Surface, plotItem);
                 // Set plot title:
-                plotEngine.DrawPlotTitle(plotTemplate, pointRef, Surface, plotItem, plotItem.IndexRef.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty);
+                plotEngine.DrawPlotTitle(plotTemplate, pointRef, Surface, plotItem, plotItem.IndexRef!.Length > 0 ? $" [{plotItem.IndexRef[0]}/{plotItem.IndexRef[1]}]" : string.Empty);
 
             }
         }

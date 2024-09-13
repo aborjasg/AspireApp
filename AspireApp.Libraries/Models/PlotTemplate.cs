@@ -51,6 +51,18 @@ namespace AspireApp.Libraries.Models
         /// <summary>
         /// 
         /// </summary>
+        public bool IsTitleVisible { get; set; } = true;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsAxisVisible { get; set; } = true;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsBarVisible { get; set; } = true;
+        /// <summary>
+        /// 
+        /// </summary>
         public bool Active { get; set; } = true;
     }
 }

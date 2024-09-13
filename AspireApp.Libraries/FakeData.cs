@@ -12,7 +12,7 @@ namespace AspireApp.Libraries
             var result = new double[Constants.NUM_COLS, Constants.NUM_ROWS];
             var random = new Random();
 
-            for (int k = 0; k < 100; k++)
+            for (int k = 0; k < 200; k++)
                 result[random.Next(0, Constants.NUM_COLS), random.Next(0, Constants.NUM_ROWS)] = 1;
 
             return result;

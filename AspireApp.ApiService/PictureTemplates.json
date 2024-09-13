@@ -1,5 +1,41 @@
 [
   {
+    "Name": "Combined NCP (Miniature)",
+    "TestType": "ncps",
+    "PictureDimensions": [ 78, 418 ],
+    "PictureLayout": [ 1, 8 ],
+    "PicturePreviewFlag": true,
+    "PicturePreviewPath": "C:\\Redlen\\Plots\\",
+    "StartPoint": [ 2, 2 ],
+    "PlotSpacing": [ 0, 0 ],
+    "PlotTemplates": [
+      {
+        "Name": "Combined_NCP",
+        "Title": "",
+        "PlotType": "ncp",
+        "AreaLayout": "Squad",
+        "FrameSize": [],
+        "FrameSpace": [],
+        "StrokeWidth": 2,
+        "Axis": [
+          {
+            "Label": "X",
+            "Range": [ 0, 36, 6 ],
+            "Offset": [ 1, 1 ] // StrokeWidth / 2
+          },
+          {
+            "Label": "Y",
+            "Range": [ 0, 24, 6 ],
+            "Offset": [ 1, 1 ] // StrokeWidth / 2
+          }
+        ],
+        "IsTitleVisible": false,
+        "IsAxisVisible": false,
+        "Active": true
+      }
+    ]
+  },
+  {
     "Name": "Combined NCP (Picture)",
     "TestType": "ncps",
     "PictureDimensions": [ 640, 960 ],
@@ -14,7 +50,7 @@
         "Title": "NCP (Plot)",
         "PlotType": "ncp",
         "AreaLayout": "Squad",
-        "FrameSize": [ 288, 192 ],
+        "FrameSize": [],
         "FrameSpace": [],
         "StrokeWidth": 8,
         "Axis": [
@@ -29,7 +65,7 @@
             "Offset": [ 4, 4 ] // StrokeWidth / 2
           }
         ],
-        "Active": true
+        "Active": false
       }
     ]
   },
@@ -37,7 +73,7 @@
     "Name": "Spectrum (Picture)",
     "TestType": "spectrum",
     "PictureDimensions": [ 720, 280 ],
-    "PictureLayout": [ 0, 0 ],
+    "PictureLayout": [ 2, 1 ],
     "PicturePreviewFlag": true,
     "PicturePreviewPath": "C:\\Redlen\\Plots\\",
     "StartPoint": [ 20, 20 ],
