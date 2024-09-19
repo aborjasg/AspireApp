@@ -13,7 +13,11 @@
         /// <summary>
         /// 
         /// </summary>
-        heatmap = 1,
+        heatmap = 10,
+        /// <summary>
+        /// 
+        /// </summary>
+        heatmap_stability = 11,
         /// <summary>
         ///  blue bars
         /// </summary>
@@ -22,6 +26,10 @@
         /// 
         /// </summary>
         histogram2 = 22,
+        /// <summary>
+        /// 
+        /// </summary>
+        histogram_stability = 23,
         /// <summary>
         ///  gray and red lines 
         /// </summary>

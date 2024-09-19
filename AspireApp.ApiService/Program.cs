@@ -35,7 +35,7 @@ app.MapPost("/getSourceData", (ConnectionString connectionString, DerivedDataFil
     var result = new ActionResponse() { Type = "Information", StartDate = DateTime.Now };
     try
     {
-        var engine = new DataSourceEngine(filter.Name, Enum.Parse<enmTestType>(filter.TestType));
+        var engine = new DataSourceEngine(filter.Name);
         var derivedData = engine.GetDerivedData();
         result.Message = "OK";
         result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(derivedData));
@@ -57,24 +57,31 @@ app.MapPost("/processData", (ConnectionString connectionString, RunImage record)
         if (!string.IsNullOrEmpty(record.DataSource))
         {
             var derivedData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(record.DataSource))!;
-            var dataEngine = new DataSourceEngine(derivedData.Name, derivedData.TestType);
+            var dataEngine = new DataSourceEngine(derivedData.Name);
             var pictureTemplate = dataEngine.GetPictureTemplate();
-            IPlotEngine? plotEngine = derivedData.TestType switch
+            IPlotEngine? plotEngine = pictureTemplate.TestType switch
             {
+                enmTestType.heatmapDM => new PlotterNCP(),
                 enmTestType.ncps => new PlotterNCP(),
                 enmTestType.spectrum => new PlotterSpectrum(),
                 enmTestType.energy => new PlotterEnergy(),
                 enmTestType.energy_cal => new PlotterEnergyCal(),
                 enmTestType.uniformity => new PlotterUniformity(),
+                enmTestType.stability => new PlotterStability(),
                 _ => null
             };
-            var pictureEngine = new PictureEngine(pictureTemplate, derivedData, plotEngine!);
-            var image = pictureEngine.MakePicture()!;
-            var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
-            record = new RunImage(derivedData.Name, metadata, derivedData, image);
+            if (plotEngine != null)
+            {
+                var pictureEngine = new PictureEngine(pictureTemplate, derivedData, plotEngine!);
+                var image = pictureEngine.MakePicture()!;
+                var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
+                record = new RunImage(derivedData.Name, metadata, derivedData, image);
 
-            result.Message = "OK";
-            result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(record));
+                result.Message = "OK";
+                result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(record));
+            }
+            else
+                throw new Exception("PlotEngine invalid");
         }
         else
             throw new Exception("DataSource invalid");

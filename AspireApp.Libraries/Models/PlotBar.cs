@@ -33,14 +33,14 @@ namespace AspireApp.Libraries.Models
         /// <summary>
         /// 
         /// </summary>
+        public bool IsLabelVisible { get; set; } = true;
+        /// <summary>
+        /// 
+        /// </summary>
         public float[] Offset { get; set; } = [];
         /// <summary>
         /// 
         /// </summary>
-        public bool[] Edges { get; set; } = [];
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool Active { get; set; } = true;
+        public bool[] Edges { get; set; } = [true, true];
     }
 }

@@ -37,7 +37,7 @@ else
     {
         
         // getDerivedData:
-        response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined_NCP", TestType = "ncps" });
+        response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined_NCP" });
         deriveData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(response.Content))!;
 
         // processData:

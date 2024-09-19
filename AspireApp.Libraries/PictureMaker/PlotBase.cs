@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AspireApp.Libraries.PictureMaker
 {
@@ -148,32 +149,70 @@ namespace AspireApp.Libraries.PictureMaker
 
             if (AxisValues != null && plotTemplate.IsAxisVisible)
             {
-                string numDecimals = "0";
-                if (AxisValues[0][2] < 1) numDecimals = AxisValues[0][2] <= 0.25 ? "0.00" : "0.0";
-
-                // X Axis:
-                paint.TextAlign = SKTextAlign.Center;
-
-                for (double k = AxisValues[0][0]; k <= AxisValues[0][1]; k += AxisValues[0][2])
+                switch (plotTemplate.PlotType)
                 {
-                    var (x, y) = ((float)(point.X + plotTemplate.Axis[0].Offset[0] + (k - AxisValues[0][0]) * plotTemplate.Axis[0].Scale), point.Y);
-                    var pointRef = new SKPoint(x, y);
+                    case enmPlotType.histogram_stability:
+                        {                            
+                            string numDecimals = "0";
+                            if (AxisValues[0][2] < 1) numDecimals = AxisValues[0][2] <= 0.25 ? "0.00" : "0.0";
 
-                    surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X, pointRef.Y + 5), Constants.PaintBorder);
-                    surface.Canvas.DrawText(k.ToString(numDecimals), new SKPoint(pointRef.X, pointRef.Y + 17), paint);
-                }
+                            // X Axis:
+                            paint.TextAlign = SKTextAlign.Center;
 
-                // Y Axis:
-                paint.TextAlign = SKTextAlign.Right;
+                            for (double k = AxisValues[0][0]; k <= AxisValues[0][1]; k += AxisValues[0][2])
+                            {
+                                var (x, y) = ((float)(point.X + plotTemplate.Axis[0].Offset[0] + (k - AxisValues[0][0]) * plotTemplate.Axis[0].Scale), (float)(point.Y));
+                                var pointRef = new SKPoint(x, y);
 
-                for (double k = AxisValues[1][0]; k <= AxisValues[1][1]; k += AxisValues[1][2])
-                {
-                    var (x, y) = (point.X, (float)(point.Y - (plotTemplate.Axis[1].Offset[0] + (k - AxisValues[1][0]) * plotTemplate.Axis[1].Scale)));
-                    var pointRef = new SKPoint(x, y);
+                                surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X, pointRef.Y + 5), Constants.PaintBorder);
+                                surface.Canvas.DrawText(k.ToString(numDecimals), new SKPoint(pointRef.X, pointRef.Y + 17), paint);
+                            }
 
-                    surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X - 5, pointRef.Y), Constants.PaintBorder);
-                    surface.Canvas.DrawText(k.ToString(), new SKPoint(pointRef.X - 7, pointRef.Y + 3), paint);
-                }
+                            // Y Axis:
+                            paint.TextAlign = SKTextAlign.Right;
+
+                            for (int k = 0; k < Constants.Ticks.Length; k++)
+                            {
+                                var (x, y) = (point.X, (float)(point.Y - plotTemplate.Axis[1].Offset[0] - k * (plotTemplate.FrameSize[1] / (Constants.Ticks.Length - 1))));
+                                var pointRef = new SKPoint(x, y);
+
+                                surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X - 5, pointRef.Y), Constants.PaintBorder);
+                                surface.Canvas.DrawText(Constants.Ticks[k].ToString(), new SKPoint(pointRef.X - 7, pointRef.Y + 3), paint);
+                            }
+
+                            break;
+                        }
+                    default:
+                        {
+                            string numDecimals = "0";
+                            if (AxisValues[0][2] < 1) numDecimals = AxisValues[0][2] <= 0.25 ? "0.00" : "0.0";
+
+                            // X Axis:
+                            paint.TextAlign = SKTextAlign.Center;
+
+                            for (double k = AxisValues[0][0]; k <= AxisValues[0][1]; k += AxisValues[0][2])
+                            {
+                                var (x, y) = ((float)(point.X + plotTemplate.Axis[0].Offset[0] + (k - AxisValues[0][0]) * plotTemplate.Axis[0].Scale), point.Y);
+                                var pointRef = new SKPoint(x, y);
+
+                                surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X, pointRef.Y + 5), Constants.PaintBorder);
+                                surface.Canvas.DrawText(k.ToString(numDecimals), new SKPoint(pointRef.X, pointRef.Y + 17), paint);
+                            }
+
+                            // Y Axis:
+                            paint.TextAlign = SKTextAlign.Right;
+
+                            for (double k = AxisValues[1][0]; k <= AxisValues[1][1]; k += AxisValues[1][2])
+                            {
+                                var (x, y) = (point.X, (float)(point.Y - (plotTemplate.Axis[1].Offset[0] + (k - AxisValues[1][0]) * plotTemplate.Axis[1].Scale)));
+                                var pointRef = new SKPoint(x, y);
+
+                                surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X - 5, pointRef.Y), Constants.PaintBorder);
+                                surface.Canvas.DrawText(k.ToString(), new SKPoint(pointRef.X - 7, pointRef.Y + 3), paint);
+                            }
+                            break;
+                        }
+                }                
             }
         }
         /// <summary>
@@ -182,72 +221,69 @@ namespace AspireApp.Libraries.PictureMaker
         /// <param name="plotTemplate"></param>
         /// <param name="surface"></param>
         /// <param name="edges"></param>
-        protected void DrawBar(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, bool[]? edges = null)
+        protected void DrawBar(PlotTemplate plotTemplate, SKPoint point, SKSurface surface)
         {
-            if (plotTemplate.Bar != null && AxisValues != null && plotTemplate.IsAxisVisible)
+            if (plotTemplate.Bar != null && AxisValues != null && plotTemplate.IsBarVisible)
             {
-                if (plotTemplate.Bar.Active)
+                int barX = plotTemplate.Bar.Orientation switch
                 {
-                    int barX = plotTemplate.Bar.Orientation switch
-                    {
-                        enmTextOrientation.Vertical => (int)plotTemplate.FrameSize[0] + plotTemplate.Bar.Spacing[0],
-                        enmTextOrientation.Horizontal => (int)(point.X),
-                        _ => 0
-                    };
-                    int barY = plotTemplate.Bar.Orientation switch
-                    {
-                        enmTextOrientation.Vertical => (int)(point.Y - plotTemplate.FrameSize[1]),
-                        enmTextOrientation.Horizontal => (int)plotTemplate.FrameSize[1] + plotTemplate.Bar.Spacing[1],
-                        _ => 0
-                    };
+                    enmTextOrientation.Vertical => (int)(point.X + plotTemplate.FrameSize[0] + plotTemplate.Bar.Spacing[0]),
+                    enmTextOrientation.Horizontal => (int)(point.X),
+                    _ => 0
+                };
+                int barY = plotTemplate.Bar.Orientation switch
+                {
+                    enmTextOrientation.Vertical => (int)(point.Y - plotTemplate.FrameSize[1]),
+                    enmTextOrientation.Horizontal => (int)(point.Y + plotTemplate.FrameSize[1] + plotTemplate.Bar.Spacing[1]),
+                    _ => 0
+                };
 
-                    var pointRef = new SKPoint(barX, barY);
-                    var data = new uint[plotTemplate.Bar.Size[0], plotTemplate.Bar.Size[1]];
+                var pointRef = new SKPoint(barX, barY);
+                var data = new uint[plotTemplate.Bar.Size[0], plotTemplate.Bar.Size[1]];
 
-                    // right side gradient bar
-                    var rcBar = new SKRect
-                    {
-                        Left = pointRef.X,
-                        Top = pointRef.Y,
-                        Right = pointRef.X + data.GetLength(0),
-                        Bottom = pointRef.Y + data.GetLength(1)
-                    };
+                // right side gradient bar
+                var rcBar = new SKRect
+                {
+                    Left = pointRef.X,
+                    Top = pointRef.Y,
+                    Right = pointRef.X + data.GetLength(0),
+                    Bottom = pointRef.Y + data.GetLength(1)
+                };
 
-                    //Canvas.DrawBitmap(bmp, point);
-                    var paintBar = new SKPaint
-                    {
-                        Color = SKColors.Black,
-                        IsAntialias = true,
-                        StrokeCap = SKStrokeCap.Butt,
-                        StrokeJoin = SKStrokeJoin.Miter,
-                        StrokeWidth = 1,
-                        Shader = SKShader.CreateLinearGradient(
-                                new SKPoint(rcBar.Left, rcBar.Bottom),
-                                new SKPoint(rcBar.Left, rcBar.Top),
-                                plotTemplate.Bar.Colors,
-                                plotTemplate.Bar.ColorPositions,
-                                SKShaderTileMode.Repeat),
-                        Style = SKPaintStyle.Fill
-                    };
+                //Canvas.DrawBitmap(bmp, point);
+                var paintBar = new SKPaint
+                {
+                    Color = SKColors.Black,
+                    IsAntialias = false,
+                    StrokeCap = SKStrokeCap.Butt,
+                    StrokeJoin = SKStrokeJoin.Miter,
+                    StrokeWidth = 1,
+                    Shader = SKShader.CreateLinearGradient(
+                            new SKPoint(rcBar.Left, rcBar.Bottom),
+                            new SKPoint(rcBar.Left, rcBar.Top),
+                            plotTemplate.Bar.Colors,
+                            plotTemplate.Bar.ColorPositions,
+                            SKShaderTileMode.Repeat),
+                    Style = SKPaintStyle.Fill
+                };
 
-                    var paintBorder = new SKPaint
-                    {
-                        TextSize = 11f,
-                        IsAntialias = true,
-                        Color = SKColors.Black,
-                        IsStroke = false,
-                        StrokeWidth = 1f,
-                        Style = SKPaintStyle.Stroke,
-                        TextAlign = SKTextAlign.Right,
-                        //Typeface = SKt
-                    };
+                var paintBorder = new SKPaint
+                {
+                    TextSize = 11f,
+                    IsAntialias = false,
+                    Color = SKColors.Black,
+                    IsStroke = false,
+                    StrokeWidth = 1f,
+                    Style = SKPaintStyle.Stroke,
+                    TextAlign = SKTextAlign.Right
+                };
 
-                    surface.Canvas.DrawRect(rcBar, paintBar);
-                    surface.Canvas.DrawRect(rcBar, paintBorder);
+                surface.Canvas.DrawRect(rcBar, paintBar);
+                surface.Canvas.DrawRect(rcBar, paintBorder);
 
-                    // Addind 2 triangles:
-                    if (edges == null) edges = new bool[] { true, true };
-
+                // Addind 2 triangles:
+                if (plotTemplate.Bar.Edges.Length > 0)
+                {
                     var paintTriangle = new SKPaint
                     {
                         StrokeCap = SKStrokeCap.Butt,
@@ -255,7 +291,7 @@ namespace AspireApp.Libraries.PictureMaker
                         Style = SKPaintStyle.Fill
                     };
 
-                    if (edges[0])
+                    if (plotTemplate.Bar.Edges[0])
                     {
                         var path1 = new SKPath();
                         path1.MoveTo(rcBar.Left, rcBar.Top);
@@ -268,7 +304,7 @@ namespace AspireApp.Libraries.PictureMaker
                         surface.Canvas.DrawPath(path1, paintBorder);
                     }
 
-                    if (edges[1])
+                    if (plotTemplate.Bar.Edges[1])
                     {
                         var path2 = new SKPath();
                         path2.MoveTo(rcBar.Left, rcBar.Bottom);
@@ -281,25 +317,28 @@ namespace AspireApp.Libraries.PictureMaker
                         surface.Canvas.DrawPath(path2, paintBorder);
                     }
 
-                    //label possition and label
-                    string numDecimals = "0";
-                    if (plotTemplate.Bar.Labels[2] < 1) numDecimals = plotTemplate.Bar.Labels[2] <= 0.25 ? "0.00" : "0.0";
-
-                    paintBorder.Style = SKPaintStyle.StrokeAndFill;
-                    var labels = new Dictionary<string, SKPoint>();
-                    double jump = (plotTemplate.Bar.Size[1] - plotTemplate.Bar.Offset[0] - plotTemplate.Bar.Offset[1]) / (plotTemplate.Bar.Labels[1] - plotTemplate.Bar.Labels[0]);
-
-                    for (double k = plotTemplate.Bar.Labels[0]; Math.Round(k, 4) <= plotTemplate.Bar.Labels[1]; k += Math.Round(plotTemplate.Bar.Labels[2], 4))
+                    if (plotTemplate.Bar.IsLabelVisible)
                     {
-                        labels.Add(k.ToString(numDecimals), new SKPoint(rcBar.Right, (float)(rcBar.Bottom - plotTemplate.Bar.Offset[0] - (k - plotTemplate.Bar.Labels[0]) * jump)));
-                    }
+                        //label possition and label
+                        string numDecimals = "0";
+                        if (plotTemplate.Bar.Labels[2] < 1) numDecimals = plotTemplate.Bar.Labels[2] <= 0.25 ? "0.00" : "0.0";
 
-                    var rcMaxTextBound = new SKRect();
-                    paintBorder.MeasureText("-5", ref rcMaxTextBound);
-                    foreach (var item in labels)
-                    {
-                        surface.Canvas.DrawLine(item.Value, new SKPoint(item.Value.X + 5, item.Value.Y), paintBorder);
-                        surface.Canvas.DrawText(item.Key, new SKPoint(item.Value.X + rcMaxTextBound.Width, item.Value.Y + rcMaxTextBound.Height / 2f - 2), Constants.PaintAxis);
+                        paintBorder.Style = SKPaintStyle.StrokeAndFill;
+                        var labels = new Dictionary<string, SKPoint>();
+                        double jump = (plotTemplate.Bar.Size[1] - plotTemplate.Bar.Offset[0] - plotTemplate.Bar.Offset[1]) / (plotTemplate.Bar.Labels[1] - plotTemplate.Bar.Labels[0]);
+
+                        for (double k = plotTemplate.Bar.Labels[0]; Math.Round(k, 4) <= plotTemplate.Bar.Labels[1]; k += Math.Round(plotTemplate.Bar.Labels[2], 4))
+                        {
+                            labels.Add(k.ToString(numDecimals), new SKPoint(rcBar.Right, (float)(rcBar.Bottom - plotTemplate.Bar.Offset[0] - (k - plotTemplate.Bar.Labels[0]) * jump)));
+                        }
+
+                        var rcMaxTextBound = new SKRect();
+                        paintBorder.MeasureText("-5", ref rcMaxTextBound);
+                        foreach (var item in labels)
+                        {
+                            surface.Canvas.DrawLine(item.Value, new SKPoint(item.Value.X + 5, item.Value.Y), paintBorder);
+                            surface.Canvas.DrawText(item.Key, new SKPoint(item.Value.X + rcMaxTextBound.Width, item.Value.Y + rcMaxTextBound.Height / 2f - 2), Constants.PaintAxis);
+                        }
                     }
                 }
             }
@@ -333,12 +372,13 @@ namespace AspireApp.Libraries.PictureMaker
                                 var arrayData = (double[,])plotItem.ArrayData!;
                                 var paintPoint = Constants.PaintPoint;
                                 paintPoint.StrokeWidth = plotTemplate.StrokeWidth;
+                                plotItem.Title = $"NCP count={arrayData.NanSum()}";
 
-                                for (int col = 0; col < arrayData.GetLength(0); col++)
+                                for (int row = 0; row < arrayData.GetLength(0); row++)
                                 {
-                                    for (int row = 0; row < arrayData.GetLength(1); row++)
+                                    for (int col = 0; col < arrayData.GetLength(1); col++)
                                     {
-                                        if (arrayData[col, row] > 0)
+                                        if (arrayData[row, col] > 0)
                                         {
                                             var (px, py) = (col * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2, row * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2);
                                             paintPoint.Color = color;
@@ -346,8 +386,6 @@ namespace AspireApp.Libraries.PictureMaker
                                         }
                                     }
                                 }
-                                surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
-
                                 break;
                             }
                         case enmPlotType.heatmap:
@@ -370,25 +408,70 @@ namespace AspireApp.Libraries.PictureMaker
                                             }
                                     }
 
-                                    for (int i = 0; i < arrayData.GetLength(0); i++)
+                                    for (int row = 0; row < arrayData.GetLength(0); row++)
                                     {
-                                        for (int j = 0; j < arrayData.GetLength(1); j++)
+                                        for (int col = 0; col < arrayData.GetLength(1); col++)
                                         {
-                                            double factor = 1 - (plotTemplate.Bar!.Labels[1] - arrayData[i, j]) / (plotTemplate.Bar.Labels[1] - plotTemplate.Bar.Labels[0]);
-                                            if (factor < 0)
+                                            double factor = 1 - (plotTemplate.Bar.Labels[1] - arrayData[row, col]) / (plotTemplate.Bar.Labels[1] - plotTemplate.Bar.Labels[0]);
+
+                                            if (factor <= 0)
                                                 color = SKColors.Blue;
-                                            else if (factor > 1)
+                                            else if (factor >= 1)
                                                 color = SKColors.Red;
                                             else
                                                 color = ColorMap.GetColor((plotTemplate.Bar.Colors, plotTemplate.Bar.ColorPositions), (float)factor);
 
-                                            var (px, py) = (i * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2, plotTemplate.FrameSize[1] - (j * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2));
+                                            var (px, py) = (col * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2, plotTemplate.FrameSize[1] - (row * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2));
                                             canvas.DrawPoint(new SKPoint(pointRef.X + px, pointRef.Y - py), new SKPaint { Color = color, FilterQuality = SKFilterQuality.High, Style = SKPaintStyle.Fill, StrokeWidth = plotTemplate.StrokeWidth });
                                         }
                                     }
                                 }
-                                surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
+                                break;
+                            }
+                        case enmPlotType.heatmap_stability:
+                            {
+                                var (x, y) = GetPoint0(plotTemplate);
+                                SKPoint pointRef = new SKPoint(x, y);
+                                var color = SKColors.Black;
+                                var arrayData = (double[,])plotItem.ArrayData!;
+                                var paintPoint = new SKPaint { IsAntialias = false, FilterQuality = SKFilterQuality.High, Style = SKPaintStyle.Fill, StrokeWidth = plotTemplate.StrokeWidth, TextSize = 10 };
+                                plotItem.Title = $"D{plotItem.IndexRef[0] + 1}";
 
+                                if (plotTemplate.Bar != null)
+                                {
+                                    switch (plotTemplate.Bar.ColorMap)
+                                    {
+                                        case "viridis":
+                                            {
+                                                (plotTemplate.Bar.Colors, plotTemplate.Bar.ColorPositions) = ColorMap.Viridis;
+                                                break;
+                                            }
+                                    }
+
+                                    // Get color range:
+                                    var ncpCriteria = Constants.DNumberNcpThresholdsObj[0] * 100;
+                                    var ncpFactor = Math.Floor(ncpCriteria / 2) + 1;
+                                    var multiplier = ncpFactor != 2 ? 2 : 1; // ok sure, but why?                
+                                    var colorScale = new float[] { (float)(multiplier * (ncpCriteria * -1)), (float)(multiplier * ncpCriteria) };
+                                    
+                                    for (int row = 0; row < arrayData.GetLength(0); row++)
+                                    {
+                                        for (int col = 0; col < arrayData.GetLength(1); col++)
+                                        {
+                                            float factor =(float)((arrayData[row, col] - colorScale[0]) / (colorScale[1] - colorScale[0]));
+                                            if (factor <= 0)
+                                                color = SKColors.Blue;
+                                            else if (factor >= 1)
+                                                color = SKColors.Red;
+                                            else
+                                                color = ColorMap.GetColor(ColorMap.Viridis, factor);
+
+                                            var (px, py) = (col * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2, plotTemplate.FrameSize[1] - (row * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2));
+                                            paintPoint.Color = color;
+                                            canvas.DrawPoint(new SKPoint(pointRef.X + px, pointRef.Y - py), paintPoint);
+                                        }
+                                    }
+                                }
                                 break;
                             }
                         case enmPlotType.histogram1:
@@ -416,8 +499,6 @@ namespace AspireApp.Libraries.PictureMaker
 
                                     canvas.DrawLine(new SKPoint(px, py0), new SKPoint(px, py1), paintPoint);
                                 }
-                                surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
-
                                 break;
                             }
                         case enmPlotType.histogram2:
@@ -472,9 +553,68 @@ namespace AspireApp.Libraries.PictureMaker
                                     py1 = (float)(py0 - refY);
 
                                     canvas.DrawLine(new SKPoint(px, py0), new SKPoint(px, py1), paintPoint);
-                                }
-                                surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
+                                }                                
+                                break;
+                            }
+                        case enmPlotType.histogram_stability:
+                            {                          
+                                var ncpCriteria = Constants.DNumberNcpThresholdsObj[0] * 100;
+                                var ncpFactor = Math.Floor(ncpCriteria / 2) + 1;
+                                var multiplier = 0 != 2 ? 2 : 1; 
+                                var colorScale = new double[] { multiplier * (ncpFactor * -1), multiplier * ncpFactor };
+                                plotItem.Title = $"µ={plotItem.ArrayData.NanMean():N4}% σ={plotItem.ArrayData.NanStd():N2}% M={plotItem.ArrayData.NanMedian():N5}%";
 
+                                // X Axis:
+                                AxisValues[0] = new double[] { colorScale[0], colorScale[1], Math.Abs(colorScale[1]) * 0.25 };
+                                var list = new List<double>();
+
+                                foreach (var elem in (double[,])plotItem.ArrayData)
+                                {
+                                    list.Add((float)elem);
+                                }
+
+                                var listMin = AxisValues[0][0];
+                                var listMax = AxisValues[0][1];
+                                int binSize = DataTransformation.GetBinSize(list, new float[] { 0.75f, 0.25f });
+                                double scope = (listMax - listMin) / binSize;
+                                var dict = new Dictionary<double, int>();
+
+                                for (double k = listMin; k < listMax; k += scope)
+                                {
+                                    var count = list.OrderBy(x=>x).Count(x => x >= k && x < k + scope);
+                                    dict.Add(k, count);
+                                }
+
+                                var (minY, maxY, baseY) = DataTransformation.AdjustLimits(0, listMax, seccionsForY, true); // (0, 864, 4);
+                                AxisValues[1] = new double[] { minY, maxY, baseY };
+                                SetScaleLayout(plotTemplate, plotItem);
+
+                                // Y Axis:
+                                SKColor color = new SKColor(31, 119, 180);
+                                var paintPoint = new SKPaint { Color = color, FilterQuality = SKFilterQuality.High, StrokeWidth = plotTemplate.StrokeWidth };
+                                var pointRef = new SKPoint(point.X, point.Y + plotTemplate.FrameSize[1]);
+                                double x, y;
+                                float px, py0, py1;
+                                var yRatio = new List<double>();
+
+                                for (int k = 0; k < Constants.Ticks.Length - 1; k++)
+                                {
+                                    yRatio.Add((float)(plotTemplate.FrameSize[1] / (Constants.Ticks.Length - 1)) / (Constants.Ticks[k + 1] - Constants.Ticks[k]));
+                                }
+
+                                // Drawing figures:
+                                foreach (var elem in dict.OrderBy(x => x.Key))
+                                {
+                                    x = (elem.Key - AxisValues[0][0]) * plotTemplate.Axis[0].Scale;
+                                    y = DataTransformation.GetValueFromOddRange(Constants.Ticks, yRatio.ToArray(), elem.Value);
+
+                                    px = (float)(plotTemplate.Axis[0].Offset[0] + x);
+                                    py0 = (float)(plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0]);
+                                    py1 = (float)(py0 - y);
+
+                                    canvas.DrawLine(new SKPoint(px, py0), new SKPoint(px, py1), paintPoint);
+                                }
+                               
                                 break;
                             }
                         case enmPlotType.linechart:
@@ -517,10 +657,7 @@ namespace AspireApp.Libraries.PictureMaker
                                     canvas.DrawPath(path, paint);
                                     canvas.DrawPoint(pointRef, Constants.PaintBack);
                                     path.Close();
-
-                                    surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
                                 }
-
                                 break;
                             }
                         case enmPlotType.curvechart:
@@ -610,10 +747,11 @@ namespace AspireApp.Libraries.PictureMaker
 
                                     path.Close();
                                 }
-                                surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
                                 break;
                             }
                     }
+
+                    surface.Canvas.DrawBitmap(bitmap, new SKPoint(point.X, point.Y - (int)plotTemplate.FrameSize[1]));
                 }
                 else
                     throw new Exception($"FrameSize invalid: {plotTemplate.FrameSize.Length}");
@@ -667,7 +805,7 @@ namespace AspireApp.Libraries.PictureMaker
         public void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem, string addToTitle = "")
         {            
             if(plotTemplate.IsTitleVisible)
-                surface.Canvas.DrawText(plotItem.Name + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
+                surface.Canvas.DrawText(plotItem.Title + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
         }
         /// <summary>
         /// 

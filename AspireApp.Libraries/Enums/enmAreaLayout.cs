@@ -13,6 +13,10 @@
         /// <summary>
         ///  Squad
         /// </summary>
-        Squad
+        Squad,
+        /// <summary>
+        /// 
+        /// </summary>
+        None
     }
 }

@@ -49,6 +49,10 @@
         /// <summary>
         /// 
         /// </summary>
-		HVCurrentLimit = 99
+		HVCurrentLimit = 99,
+        /// <summary>
+        /// 
+        /// </summary>
+        heatmapDM=100
     }
 }

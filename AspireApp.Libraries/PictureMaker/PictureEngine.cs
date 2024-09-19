@@ -6,6 +6,7 @@ using System;
 using System.Drawing;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -89,9 +90,9 @@ namespace AspireApp.Libraries.PictureMaker
             if (plotTemplate != null)
             {
                 // Calculate Point Ref:
-                if (plotItem.IndexRef != null)
+                if (plotItem.IndexRef != null && pictureTemplate.PictureLayout[0] > 0 && pictureTemplate.PictureLayout[1] > 0)
                 {
-                    plotItem.PointRef = new int[] { pictureTemplate.StartPoint[0] + (pictureTemplate.PictureDimensions[0] / pictureTemplate.PictureLayout[0]) * plotItem.IndexRef[0], pictureTemplate.StartPoint[1] + (pictureTemplate.PictureDimensions[1] / pictureTemplate.PictureLayout[1]) * plotItem.IndexRef[1] };
+                    plotItem.PointRef = new int[] { pictureTemplate.StartPoint[0] + (pictureTemplate.PlotSpacing[0] + pictureTemplate.PictureDimensions[0] / pictureTemplate.PictureLayout[0]) * plotItem.IndexRef[0], pictureTemplate.StartPoint[1] + (pictureTemplate.PlotSpacing[1] + pictureTemplate.PictureDimensions[1] / pictureTemplate.PictureLayout[1]) * plotItem.IndexRef[1] };
                     pointRef = new SKPoint(plotItem.PointRef[0], ImageInfo.Height - plotItem.PointRef[1]);
                 }
                 // Preparing plot layout:
@@ -110,6 +111,8 @@ namespace AspireApp.Libraries.PictureMaker
         {
             foreach (var item in derivedData.PlotItems!)
                 DrawPlot(item);
+            //Parallel.ForEach(derivedData.PlotItems!, item =>
+            //    DrawPlot(item));
         }
         /// <summary>
         /// 

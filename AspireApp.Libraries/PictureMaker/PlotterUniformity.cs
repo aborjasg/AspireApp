@@ -12,15 +12,5 @@ namespace AspireApp.Libraries.PictureMaker
     {
         public PlotterUniformity() { }
 
-        ///
-        protected new void SetUpLayout(PlotTemplate plotTemplate, PlotItem plotItem)
-        {
-
-        }
-
-        public new void DrawData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem)
-        {
-
-        }
     }
 }

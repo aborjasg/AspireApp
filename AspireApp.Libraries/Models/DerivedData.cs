@@ -7,11 +7,7 @@ namespace AspireApp.Libraries.Models
         /// <summary>
         /// 
         /// </summary>
-        public string Name { get; set; } = string.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
-        public enmTestType TestType;
+        public string Name { get; set; } = string.Empty;        
         /// <summary>
         /// 
         /// </summary>

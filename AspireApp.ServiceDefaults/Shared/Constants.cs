@@ -7,7 +7,11 @@ namespace AspireApp.ServiceDefaults.Shared
     {
         public const int NUM_COLS = 36;
         public const int NUM_ROWS = 24;
+        public const int NUM_BINS = 6;
         public static long UNITILIALIZED_VALUE = -99999;
+        public static double[] DNumberNcpThresholdsObj { get; set; } = new double[] { 0.001, 0.001, 0.001 };
+        public static int[] Ticks = new int[] { 0, 10, 100, 864 };
+
         public static SKColor[] Brushes = { SKColors.Blue, SKColors.Orange, SKColors.Green, SKColors.Red, SKColors.MediumPurple, SKColors.SaddleBrown };
         /// <summary>
         /// 
@@ -173,12 +177,12 @@ namespace AspireApp.ServiceDefaults.Shared
         {
             TextSize = 11f,
             IsAntialias = false,
-            IsStroke = true,
+            IsStroke = false,
             Color = SKColors.Black,
             StrokeWidth = 1f,
             Style = SKPaintStyle.Stroke,
             TextAlign = SKTextAlign.Right,
-            FilterQuality = SKFilterQuality.High
+            FilterQuality = SKFilterQuality.High,            
         };
         /// <summary>
         /// 

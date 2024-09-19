@@ -12,20 +12,20 @@ namespace AspireApp.Libraries.PictureMaker
     /// </summary>
     public class DataSourceEngine
     {
-        protected PictureTemplate template = new();
+        protected PictureTemplate pictureTemplate = new();
         protected DerivedData derivedData;
         protected const string templatesPath = "PictureTemplates.json";
 
-        public DataSourceEngine(string name, enmTestType testType)
+        public DataSourceEngine(string name)
         {
-            derivedData = new DerivedData() { Name = name, TestType = testType };
+            derivedData = new DerivedData() { Name = name };
             using (StreamReader r = new StreamReader(templatesPath))
             {
                 string json = r.ReadToEnd();
                 var templates = JsonConvert.DeserializeObject<PictureTemplate[]>(json);
                 if (templates != null)
                 {
-                    template = templates!.Where(x => x.TestType == derivedData.TestType)!.FirstOrDefault()!;
+                    pictureTemplate = templates!.Where(x => x.Name == derivedData.Name)!.FirstOrDefault()!;
                 }
             }
         }
@@ -34,12 +34,12 @@ namespace AspireApp.Libraries.PictureMaker
         /// 
         /// </summary>
         /// <param name="testType"></param>
-        /// <param name="template"></param>
+        /// <param name="pictureTemplate"></param>
         /// <returns></returns>
-        private List<PlotItem> GetDataSource(enmTestType testType, PictureTemplate pictureTemplate)
+        private List<PlotItem> GetDataSource(PictureTemplate pictureTemplate)
         {
             var result = new List<PlotItem>();
-            switch (testType)
+            switch (pictureTemplate.TestType)
             {
                 case enmTestType.ncps:
                     {
@@ -51,26 +51,46 @@ namespace AspireApp.Libraries.PictureMaker
                             
                         break;
                     }
+                case enmTestType.heatmapDM:
+                    {
+                        var random = new Random();
+                        // Preparing data sample:
+                        for (int j = 0; j < pictureTemplate.PictureLayout[1]; j++)
+                            for (int i = 0; i < pictureTemplate.PictureLayout[0]; i++)
+                                result.Add(new PlotItem() { Name = "Heatmap DM", PlotType = enmPlotType.heatmap, ArrayData = FakeData.GetHeatMapData(), IndexRef = [i, j] });
+
+                        break;
+                    }
                 case enmTestType.spectrum:
                     {
-                        var arrData1 = FakeData.GetLineChartData();
-                        var arrData2 = FakeData.GetHistogramData();
-                        result.Add(new PlotItem() { Name = "Spectrum [Linechart]", PlotType = enmPlotType.linechart, ArrayData = arrData1, PointRef = template.StartPoint, IndexRef = [0, 0] });
-                        result.Add(new PlotItem() { Name = "Spectrum [Histogram]", PlotType = enmPlotType.histogram1, ArrayData = arrData2, PointRef = [template.StartPoint[0] + template.PlotSpacing[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
+                        result.Add(new PlotItem() { Name = "Spectrum [Linechart]", PlotType = enmPlotType.linechart, ArrayData = FakeData.GetLineChartData(), IndexRef = [0, 0] });
+                        result.Add(new PlotItem() { Name = "Spectrum [Histogram]", PlotType = enmPlotType.histogram1, ArrayData = FakeData.GetHistogramData(), IndexRef = [1, 0] });
                         break;
                     }
                 case enmTestType.energy: case enmTestType.electrical:
                     {
                         var arrData = FakeData.GetHeatMapData();
-                        result.Add(new PlotItem() { Name = "Electrical [Heatmap]", PlotType = enmPlotType.heatmap, ArrayData = arrData, PointRef = template.StartPoint, IndexRef = [0, 0] });
-                        result.Add(new PlotItem() { Name = "Electrical [Histogram]", PlotType = enmPlotType.histogram2, ArrayData = arrData, PointRef = [template.StartPoint[0] + template.PlotSpacing[0] + template.PictureDimensions[0] / 2, template.StartPoint[1]], IndexRef = [0, 1] });
+                        result.Add(new PlotItem() { Name = "Electrical [Heatmap]", PlotType = enmPlotType.heatmap, ArrayData = arrData, IndexRef = [0, 0] });
+                        result.Add(new PlotItem() { Name = "Electrical [Histogram]", PlotType = enmPlotType.histogram2, ArrayData = arrData, IndexRef = [1, 0] });
                         break;
                     }
                 case enmTestType.energy_cal:
                     {
-                        result.Add(new PlotItem() { Name = "XRAY-RAW-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayRaw(), PointRef = pictureTemplate.StartPoint, IndexRef = [0, 0] });
-                        result.Add(new PlotItem() { Name = "XRAY-PB-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayPB(), PointRef = [pictureTemplate.StartPoint[0] + pictureTemplate.PictureDimensions[0] / 3, pictureTemplate.StartPoint[1]], IndexRef = [0, 1] });
-                        result.Add(new PlotItem() { Name = "XRAY-CEO2-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayCEO2(), PointRef = [pictureTemplate.StartPoint[0] + (pictureTemplate.PictureDimensions[0] / 3) * 2, pictureTemplate.StartPoint[1]], IndexRef = [0, 2] });
+                        result.Add(new PlotItem() { Name = "XRAY-RAW-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayRaw(), IndexRef = [0, 0] });
+                        result.Add(new PlotItem() { Name = "XRAY-PB-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayPB(), IndexRef = [1, 0] });
+                        result.Add(new PlotItem() { Name = "XRAY-CEO2-K-EDGE_1000_ENERGY_CALIBRATION [spec_mean]", PlotType = enmPlotType.curvechart, ArrayData = FakeData.GetEnergyCal_XrayCEO2(), IndexRef = [2, 0] });
+                        break;
+                    }
+                case enmTestType.stability:
+                    {
+                        var arrData1 = (Array)FakeData.GetStability_DNumber();
+                        var arrData2 = (Array)FakeData.GetStability_DNumber_Ncp();
+                        var data1 = (double[,])arrData1.PartOf(new SliceIndex?[] { new SliceIndex(0), null, null }!);
+                        var data2 = (double[,])arrData2.PartOf(new SliceIndex?[] { new SliceIndex(0), null, null }!);
+
+                        result.Add(new PlotItem() { Name = "D-Number [Heatmap]", PlotType = enmPlotType.heatmap_stability, ArrayData = data1, IndexRef = [0, 2] });
+                        result.Add(new PlotItem() { Name = "D-Number [Histogram]", PlotType = enmPlotType.histogram_stability, ArrayData = data1, IndexRef = [0, 1] });
+                        result.Add(new PlotItem() { Name = "D-Number [NCP]", PlotType = enmPlotType.ncp, ArrayData = data2, IndexRef = [0, 0] });
                         break;
                     }
             }
@@ -79,10 +99,10 @@ namespace AspireApp.Libraries.PictureMaker
 
         public DerivedData GetDerivedData()
         {
-            if (template != null)
-                derivedData.PlotItems = GetDataSource(derivedData.TestType, template);
+            if (pictureTemplate != null)
+                derivedData.PlotItems = GetDataSource(pictureTemplate);
             return derivedData;
         }
-        public PictureTemplate GetPictureTemplate() { return template; }
+        public PictureTemplate GetPictureTemplate() { return pictureTemplate; }
     }
 }
