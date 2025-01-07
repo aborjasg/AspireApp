@@ -9,8 +9,10 @@ namespace AspireApp.ServiceDefaults.Shared
         public const int NUM_ROWS = 24;
         public const int NUM_BINS = 6;
         public static long UNITILIALIZED_VALUE = -99999;
-        public static double[] DNumberNcpThresholdsObj { get; set; } = new double[] { 0.001, 0.001, 0.001 };
+        public static double[] D_NUMBER_NCP_THRESHOLDS { get; set; } = new double[] { 0.001, 0.001, 0.001 };
         public static int[] Ticks = new int[] { 0, 10, 100, 864 };
+        public const double SAMPLE_PERIOD = 0.025400000000000002;
+        public const int REQUIRED_SAMPLE_PERIOD = 50;
 
         public static SKColor[] Brushes = { SKColors.Blue, SKColors.Orange, SKColors.Green, SKColors.Red, SKColors.MediumPurple, SKColors.SaddleBrown };
         /// <summary>

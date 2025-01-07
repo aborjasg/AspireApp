@@ -1252,7 +1252,253 @@ namespace AspireApp.Libraries
 			return result;
 		}
 
-		#endregion
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="factor"></param>
+        /// <returns></returns>
+        public static Array AccumulateFrames(Array array, int factor)
+        {
+            Array result = null;
+            var maxlen = System.Convert.ToInt16(array.GetLength(0) / factor) * factor;
 
-	}
+            var old_shape = array.GetDimensions().ToList();
+            old_shape.RemoveAt(0);
+            var new_shape = new List<int>() { factor, maxlen / factor };
+            new_shape.AddRange(old_shape);
+
+            if (maxlen != array.GetLength(0))
+                result = (Array)array.PartOf(new SliceIndex[] { new SliceIndex(0, maxlen), null, null, null });
+            else
+                result = array;
+
+            result = (Array)result.Reshape(new_shape.ToArray(), true);
+            result = (Array)result.NanSum(0);
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="ncp_threshold"></param>
+        /// <param name="num_repeats"></param>
+        /// <param name="views_per_repeat"></param>
+        /// <param name="window_offset"></param>
+        /// <param name="window"></param>
+        /// <param name="d_window"></param>
+        /// <param name="window_threshold"></param>
+        /// <returns></returns>
+        public static (Array, Array) CalculateDNumberValues(Array array, double[] ncp_threshold, int num_repeats, int views_per_repeat, int window_offset = 0, int window = 1200, int d_window = 200, double window_threshold = 0.9)
+        {
+            var indexes = array.GetDimensions().ToList();
+            indexes.Insert(0, num_repeats);
+
+            Array windows = Array.CreateInstance(typeof(double), indexes.ToArray());
+            var d_number = Array.CreateInstance(typeof(double), new int[] { 3, Constants.NUM_ROWS, Constants.NUM_COLS });
+            var d_number_ncps = Array.CreateInstance(typeof(bool), new int[] { 3, Constants.NUM_ROWS, Constants.NUM_COLS });
+
+            if (array.GetDimensions().Length == 3)
+            {
+                for (int k = 0; k < num_repeats; k++)
+                {
+                    var temp = (Array)array.PartOf(new SliceIndex[] { new SliceIndex(k * views_per_repeat, (k + 1) * views_per_repeat), null, null });
+                    windows.SetValue(temp, new int?[] { k, null, null, null });
+                }
+                windows = (Array)windows.NanMean(0);
+
+                var median = (Array)windows.NanMedian(new int[] { 1, 2 });
+                var start = (int)(median.IsGreaterThan(window_threshold * (double)median.NanMax(), false)).ArgMax() + window_offset;
+
+                windows = (Array)windows.PartOf(new SliceIndex[] { new SliceIndex(start, start + window), null, null });
+                median = (Array)median.PartOf(new SliceIndex[] { new SliceIndex(start, start + window) });
+                var mean = median.NanMean(0);
+                var normalized = windows.Multip(mean).Div(median.AddDimension<double>(true).AddDimension<double>(true));
+
+                mean = normalized.NanMean(0);
+                var mean_w1 = (Array)((Array)normalized.PartOf(new SliceIndex[] { new SliceIndex(null, d_window), null, null })).NanMean(0);
+                var mean_w2 = (Array)((Array)normalized.PartOf(new SliceIndex[] { new SliceIndex((window / 2 - d_window / 2), (window / 2 + d_window / 2)), null, null })).NanMean(0);
+                var mean_w3 = (Array)((Array)normalized.PartOf(new SliceIndex[] { new SliceIndex(normalized.GetLength(0) - d_window, normalized.GetLength(0)), null, null })).NanMean(0);
+
+
+                d_number.SetValue((mean_w1.Sub(mean_w2)), new int?[] { 0, null, null });
+                d_number.SetValue((mean_w1.Sub(mean_w3)), new int?[] { 1, null, null });
+                d_number.SetValue((mean_w2.Sub(mean_w3)), new int?[] { 2, null, null });
+                d_number = d_number.Div(mean);
+
+                d_number_ncps = d_number.Abs(0).Boolean_IsGreaterThan(ncp_threshold);
+
+            }
+            return (d_number, d_number_ncps);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="axis"></param>
+        /// <returns></returns>
+        public static Array MaxDeviation(Array array, int axis = -1)
+        {
+            var arrMean = (Array)array.NanMean(axis);
+            var result = Array.CreateInstance(array.GetType().GetElementType(), array.GetDimensions());
+
+            //result = array.Sub(arrMean);
+            //for (int k=0; k<array.GetLength(1); k++)
+            Parallel.For(0, array.GetLength(1), k =>
+            {
+                var temp = (Array)array.PartOf(new SliceIndex[] { null, new SliceIndex(k), null, null });
+                temp = temp.Sub(arrMean);
+                result.SetValue(temp, new int?[] { null, k, null, null });
+            });
+
+            result = result.Abs(0);
+            var tempMax = (Array)result.NanMax(axis);
+            result = tempMax.Div(arrMean);
+
+            return result;    // Not needed: Squeeze(axis);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="n"></param>
+        /// <param name="axis"></param>
+        /// <returns></returns>
+        public static Array MovingMean(Array array, int n, int axis = -1)
+        {
+            var newDims = array.GetDimensions().ToArray();
+            newDims[axis]++;
+
+            var newArray = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+            var cumsum = (Array)array.NanCumSum(axis);
+            cumsum = cumsum.MoveAxis(axis, 0);
+
+            var temp1 = (Array)cumsum.PartOf(new SliceIndex[] { new SliceIndex(n, null), null, null, null });
+            var temp2 = (Array)cumsum.PartOf(new SliceIndex[] { new SliceIndex(null, cumsum.GetLength(0) - n), null, null, null });
+            var mean = temp1.Sub(temp2).Div(n);
+            var result = mean.MoveAxis(0, axis);
+
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="norm_mask_range"></param>
+        /// <returns></returns>
+        public static (Array, Array) NormalizeArray(Array array, double norm_mask_range = 0.2)
+        {
+            var numBins = array.GetLength(0);
+            var norm_mask_mean = (Array)array.NanMean(1);
+            var norm_mask_median = (double[])norm_mask_mean.NanMedian(new int[] { 1, 2 });
+            var norm_mask = Array.CreateInstance(typeof(bool), norm_mask_mean.GetDimensions());
+            var norm = Array.CreateInstance(typeof(double), new int[] { array.GetLength(0), array.GetLength(1) });
+
+            //for (int k = 0; k < numBins; k++)
+            Parallel.For(0, numBins, k =>
+            {
+                var temp = (Array)norm_mask_mean.PartOf(new SliceIndex[] { new SliceIndex(k), null, null });
+                var temp1 = temp.Boolean_IsGreaterThan(norm_mask_median[k] * (1 - norm_mask_range));
+                var temp2 = temp.Boolean_IsLesserThan(norm_mask_median[k] * (1 + norm_mask_range));
+                var temp3 = ArrayExtensions.Logical_And(temp1, temp2);
+                norm_mask.SetValue(temp3, new int?[] { k, null, null });
+
+                var temp4 = (Array)array.PartOf(new SliceIndex[] { new SliceIndex(k), null, null, null });
+                temp4 = (Array)temp4.Transpose(new int[] { 1, 2, 0 });
+                temp4 = temp4.Visible(temp3);
+                temp4 = (Array)temp4.NanMean(0);
+                norm.SetValue(temp4, new int?[] { k, null });
+            });
+
+            // norm /= norm.mean(axis=1, keepdims=True)
+            var arrMean = (double[])norm.NanMean(1);
+            //for (int k = 0; k < numBins; k++)
+            Parallel.For(0, numBins, k =>
+            {
+                var temp5 = ((Array)norm.PartOf(new SliceIndex[] { new SliceIndex(k), null })).Div(arrMean[k]);
+                norm.SetValue(temp5, new int?[] { k, null });
+            });
+
+            return (norm, norm_mask);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static (Array, Array, Array, Array) CalculateNormalizationValues(Array array)
+        {
+            // integrate_bins:
+            int axis = 0;
+            var cc_open = (Array)array.Flip(axis);
+            cc_open = (Array)cc_open.NanCumSum(axis);
+            cc_open = (Array)cc_open.Flip(axis);
+
+            var numBins = array.GetLength(0);
+            var numViews = array.GetLength(1);
+            double sample_period = 0.025400000000000002, STABILITY_NORMALIZATION_RANGE = 0.2;
+
+            var sumcc = (Array)((Array)array.PartOf(new SliceIndex[] { new SliceIndex(1, null), null, null })).NanSum(axis);
+            var sumcc_median = (Array)sumcc.NanMedian(new int[] { 1, 2 });
+            var start = (int)(sumcc_median.IsGreaterThan(0.9 * (double)sumcc_median.NanMax(), false)).ArgMax() + (int)(10 / sample_period);
+            var end = start + (int)(60 / sample_period);
+            var temp = (Array)cc_open.PartOf(new SliceIndex[] { null, new SliceIndex(start, end), null, null });
+            var (norm, norm_mask) = NormalizeArray(temp, STABILITY_NORMALIZATION_RANGE);
+
+            var cc_norm = Array.CreateInstance(typeof(double), temp.GetDimensions());
+            var mNorm = (double[,])norm;
+
+            //for (int j=0; j<norm.GetLength(0); j++)
+            Parallel.For(0, norm.GetLength(0), j =>
+            {
+                for (int i = 0; i < norm.GetLength(1); i++)
+                {
+                    var temp1 = (Array)temp.PartOf(new SliceIndex[] { new SliceIndex(j), new SliceIndex(i), null, null });
+                    cc_norm.SetValue(temp1.Div(mNorm[j, i]), new int?[] { j, i, null, null });
+                }
+            });
+            var norm_sum = (Array)cc_norm.NanSum(new int[] { 2, 3 });
+
+            return (norm, norm_mask, cc_norm, norm_sum);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static (Array, Array, Array, Array) CalculateMD1XValues(Array array)
+        {
+            var numBins = array.GetLength(0);
+            var numViews = array.GetLength(1);
+            var STABILITY_MD1F_THRESHOLD = new double[] { double.NaN, 2, 2, 2, 2, double.NaN };
+            var STABILITY_MD1S_THRESHOLD = new double[] { double.NaN, 0.5, 0.5, 0.6, 0.8, double.NaN };
+            double view_period = 0.025;
+
+            var md1f = MaxDeviation(array, 1).Multip(100);
+            var md1s = MaxDeviation(MovingMean(array, (int)(1 / view_period), 1), 1).Multip(100);
+            var md1f_ncps = Array.CreateInstance(typeof(bool), md1f.GetDimensions());
+            var md1s_ncps = Array.CreateInstance(typeof(bool), md1s.GetDimensions());
+
+            //for (int k = 0; k < numBins; k++)
+            Parallel.For(0, numBins, k =>
+            {
+                var temp1 = (Array)md1f.PartOf(new SliceIndex[] { new SliceIndex(k), null, null });
+                md1f_ncps.SetValue(temp1.Boolean_IsGreaterThan(STABILITY_MD1F_THRESHOLD[k]), new int?[] { k, null, null });
+
+                var temp2 = (Array)md1s.PartOf(new SliceIndex[] { new SliceIndex(k), null, null });
+                md1s_ncps.SetValue(temp2.Boolean_IsGreaterThan(STABILITY_MD1S_THRESHOLD[k]), new int?[] { k, null, null });
+            });
+            return (md1f, md1s, md1f_ncps, md1s_ncps);
+        }
+
+
+        #endregion
+
+    }
 }

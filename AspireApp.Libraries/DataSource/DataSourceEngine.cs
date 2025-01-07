@@ -4,8 +4,9 @@ using AspireApp.Libraries.Models;
 using AspireApp.ServiceDefaults.Shared;
 using Newtonsoft.Json;
 using System;
+using System.ComponentModel;
 
-namespace AspireApp.Libraries.PictureMaker
+namespace AspireApp.Libraries.DataSource
 {
     /// <summary>
     /// 
@@ -36,7 +37,7 @@ namespace AspireApp.Libraries.PictureMaker
         /// <param name="testType"></param>
         /// <param name="pictureTemplate"></param>
         /// <returns></returns>
-        private List<PlotItem> GetDataSource(PictureTemplate pictureTemplate)
+        private List<PlotItem> GetFakeDataSource(PictureTemplate pictureTemplate)
         {
             var result = new List<PlotItem>();
             switch (pictureTemplate.TestType)
@@ -46,9 +47,9 @@ namespace AspireApp.Libraries.PictureMaker
                         var random = new Random();
                         // Preparing data sample:
                         for (int j = 0; j < pictureTemplate.PictureLayout[1]; j++)
-                            for (int i = 0; i < pictureTemplate.PictureLayout[0]; i++)                            
+                            for (int i = 0; i < pictureTemplate.PictureLayout[0]; i++)
                                 result.Add(new PlotItem() { Name = "Combined NCPs", PlotType = enmPlotType.ncp, ArrayData = FakeData.GetNcpData(), IndexRef = [i, j] });
-                            
+
                         break;
                     }
                 case enmTestType.heatmapDM:
@@ -67,7 +68,8 @@ namespace AspireApp.Libraries.PictureMaker
                         result.Add(new PlotItem() { Name = "Spectrum [Histogram]", PlotType = enmPlotType.histogram1, ArrayData = FakeData.GetHistogramData(), IndexRef = [1, 0] });
                         break;
                     }
-                case enmTestType.energy: case enmTestType.electrical:
+                case enmTestType.energy:
+                case enmTestType.electrical:
                     {
                         var arrData = FakeData.GetHeatMapData();
                         result.Add(new PlotItem() { Name = "Electrical [Heatmap]", PlotType = enmPlotType.heatmap, ArrayData = arrData, IndexRef = [0, 0] });
@@ -100,9 +102,83 @@ namespace AspireApp.Libraries.PictureMaker
         public DerivedData GetDerivedData()
         {
             if (pictureTemplate != null)
-                derivedData.PlotItems = GetDataSource(pictureTemplate);
+                derivedData.PlotItems = GetFakeDataSource(pictureTemplate);
             return derivedData;
         }
+
         public PictureTemplate GetPictureTemplate() { return pictureTemplate; }
+
+        public new Dictionary<enmDerivedData, Array> GetDerivedDataFromFile(enmTestType testType, Array arrData)
+        {
+            var result = new Dictionary<enmDerivedData, Array>();
+            try
+            {
+                if (arrData != null)
+                {
+                    switch (testType)
+                    {
+                        case enmTestType.stability:
+                            {
+                                Console.WriteLine($"StabilityTest -> Starting ProcessSource()...");
+                                if (arrData.GetLength(0) == 13)
+                                    arrData = (Array)arrData.PartOf(new SliceIndex[] { new SliceIndex(6, 12), null, null, null });
+
+                                var numBins = arrData.GetLength(0);
+                                var numViews = arrData.GetLength(1);
+                                //var areaCorrection = Container.ModuleConfig.AreaCorrect();
+                                
+                                var sample_period = (int)(Constants.SAMPLE_PERIOD * 1000);
+                                int num_repeats = 1, window_offset = 20;
+
+                                if (Constants.REQUIRED_SAMPLE_PERIOD % sample_period != 0)
+                                    throw new Exception($"Sampling period is not an integer factor of {Constants.REQUIRED_SAMPLE_PERIOD} ms");
+
+                                Console.WriteLine($"StabilityTest -> ProcessSource() -> Getting 'cc_data_resampled' ...");
+                                var resampling_factor = Constants.REQUIRED_SAMPLE_PERIOD / sample_period;
+                                var temp = arrData.MoveAxis(0, 1);
+                                var cc_data_resampled = DataTransformation.AccumulateFrames(temp, resampling_factor);
+                                cc_data_resampled = cc_data_resampled.MoveAxis(0, 1);
+
+                                var sumcc_resampled = (Array)((Array)cc_data_resampled.PartOf(new SliceIndex[] { new SliceIndex(1, null), null, null, null })).NanSum(0);
+                                var views_per_repeat = (int)(numViews / num_repeats / resampling_factor);
+                                var ncp_threshold = Constants.D_NUMBER_NCP_THRESHOLDS;
+
+                                Console.WriteLine($"StabilityTest -> ProcessSource() -> Getting 'dnumber' values ...");
+                                var (d_number, d_number_ncps) = DataTransformation.CalculateDNumberValues(sumcc_resampled, ncp_threshold, num_repeats, views_per_repeat, window_offset);
+                                result.Add(enmDerivedData.d_number, d_number);
+                                result.Add(enmDerivedData.d_number_ncps, d_number_ncps);
+
+                                Console.WriteLine($"StabilityTest -> ProcessSource() -> Getting 'raw_sum' values ...");
+                                var raw_sum = (Array)arrData.NanSum(new int[] { 2, 3 });
+                                var raw_sum_resampled = (Array)cc_data_resampled.NanSum(new int[] { 2, 3 });
+                                result.Add(enmDerivedData.raw_sum, raw_sum);
+                                result.Add(enmDerivedData.raw_sum_resampled, raw_sum_resampled);
+
+                                Console.WriteLine($"StabilityTest -> ProcessSource() -> Getting 'norm' values ...");
+                                var (norm, norm_mask, cc_norm, norm_sum) = DataTransformation.CalculateNormalizationValues(arrData);
+                                result.Add(enmDerivedData.norm, norm);
+                                result.Add(enmDerivedData.norm_mask, norm_mask);
+                                result.Add(enmDerivedData.norm_sum, norm_sum);
+
+                                Console.WriteLine($"StabilityTest -> ProcessSource() -> Getting 'md1x' values ...");
+                                var (md1f, md1s, md1f_ncps, md1s_ncps) = DataTransformation.CalculateMD1XValues(cc_norm);
+                                result.Add(enmDerivedData.md1f, md1f);
+                                result.Add(enmDerivedData.md1s, md1s);
+                                result.Add(enmDerivedData.md1f_ncps, md1f_ncps);
+                                result.Add(enmDerivedData.md1s_ncps, md1s_ncps);
+
+                                Console.WriteLine($"StabilityTest -> Plot Dictionary ready. End of Process.");
+                                break;
+                            }
+                    }
+                    
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error Message: {ex.Message}");
+            }
+            return result;
+        }
     }
 }

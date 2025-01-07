@@ -173,7 +173,7 @@ namespace AspireApp.Libraries.PictureMaker
 
                             for (int k = 0; k < Constants.Ticks.Length; k++)
                             {
-                                var (x, y) = (point.X, (float)(point.Y - plotTemplate.Axis[1].Offset[0] - k * (plotTemplate.FrameSize[1] / (Constants.Ticks.Length - 1))));
+                                var (x, y) = (point.X, (float)(point.Y - plotTemplate.Axis[1].Offset[0] - (k - AxisValues[1][0]) * plotTemplate.Axis[1].Scale));
                                 var pointRef = new SKPoint(x, y);
 
                                 surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X - 5, pointRef.Y), Constants.PaintBorder);
@@ -204,7 +204,7 @@ namespace AspireApp.Libraries.PictureMaker
 
                             for (double k = AxisValues[1][0]; k <= AxisValues[1][1]; k += AxisValues[1][2])
                             {
-                                var (x, y) = (point.X, (float)(point.Y - (plotTemplate.Axis[1].Offset[0] + (k - AxisValues[1][0]) * plotTemplate.Axis[1].Scale)));
+                                var (x, y) = (point.X, (float)(point.Y - plotTemplate.Axis[1].Offset[0] - (k - AxisValues[1][0]) * plotTemplate.Axis[1].Scale));
                                 var pointRef = new SKPoint(x, y);
 
                                 surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X - 5, pointRef.Y), Constants.PaintBorder);
@@ -449,11 +449,12 @@ namespace AspireApp.Libraries.PictureMaker
                                     }
 
                                     // Get color range:
-                                    var ncpCriteria = Constants.DNumberNcpThresholdsObj[0] * 100;
+                                    var ncpCriteria = Constants.D_NUMBER_NCP_THRESHOLDS[0] * 100;
                                     var ncpFactor = Math.Floor(ncpCriteria / 2) + 1;
                                     var multiplier = ncpFactor != 2 ? 2 : 1; // ok sure, but why?                
-                                    var colorScale = new float[] { (float)(multiplier * (ncpCriteria * -1)), (float)(multiplier * ncpCriteria) };
-                                    
+                                    //var colorScale = new float[] { (float)(multiplier * (ncpCriteria * -1)), (float)(multiplier * ncpCriteria) };
+                                    var colorScale = plotTemplate.Bar.Labels;
+
                                     for (int row = 0; row < arrayData.GetLength(0); row++)
                                     {
                                         for (int col = 0; col < arrayData.GetLength(1); col++)
@@ -558,7 +559,7 @@ namespace AspireApp.Libraries.PictureMaker
                             }
                         case enmPlotType.histogram_stability:
                             {                          
-                                var ncpCriteria = Constants.DNumberNcpThresholdsObj[0] * 100;
+                                var ncpCriteria = Constants.D_NUMBER_NCP_THRESHOLDS[0] * 100;
                                 var ncpFactor = Math.Floor(ncpCriteria / 2) + 1;
                                 var multiplier = 0 != 2 ? 2 : 1; 
                                 var colorScale = new double[] { multiplier * (ncpFactor * -1), multiplier * ncpFactor };
@@ -575,7 +576,7 @@ namespace AspireApp.Libraries.PictureMaker
 
                                 var listMin = AxisValues[0][0];
                                 var listMax = AxisValues[0][1];
-                                int binSize = DataTransformation.GetBinSize(list, new float[] { 0.75f, 0.25f });
+                                int binSize = 50; // DataTransformation.GetBinSize(list, new float[] { 0.75f, 0.25f });
                                 double scope = (listMax - listMin) / binSize;
                                 var dict = new Dictionary<double, int>();
 
@@ -585,7 +586,7 @@ namespace AspireApp.Libraries.PictureMaker
                                     dict.Add(k, count);
                                 }
 
-                                var (minY, maxY, baseY) = DataTransformation.AdjustLimits(0, listMax, seccionsForY, true); // (0, 864, 4);
+                                var (minY, maxY, baseY) = DataTransformation.AdjustLimits(0, dict.Values.Max(), seccionsForY, true); // (0, 864, 4);
                                 AxisValues[1] = new double[] { minY, maxY, baseY };
                                 SetScaleLayout(plotTemplate, plotItem);
 
@@ -595,18 +596,12 @@ namespace AspireApp.Libraries.PictureMaker
                                 var pointRef = new SKPoint(point.X, point.Y + plotTemplate.FrameSize[1]);
                                 double x, y;
                                 float px, py0, py1;
-                                var yRatio = new List<double>();
-
-                                for (int k = 0; k < Constants.Ticks.Length - 1; k++)
-                                {
-                                    yRatio.Add((float)(plotTemplate.FrameSize[1] / (Constants.Ticks.Length - 1)) / (Constants.Ticks[k + 1] - Constants.Ticks[k]));
-                                }
 
                                 // Drawing figures:
                                 foreach (var elem in dict.OrderBy(x => x.Key))
                                 {
                                     x = (elem.Key - AxisValues[0][0]) * plotTemplate.Axis[0].Scale;
-                                    y = DataTransformation.GetValueFromOddRange(Constants.Ticks, yRatio.ToArray(), elem.Value);
+                                    y = (elem.Value - AxisValues[1][0]) * plotTemplate.Axis[1].Scale;
 
                                     px = (float)(plotTemplate.Axis[0].Offset[0] + x);
                                     py0 = (float)(plotTemplate.FrameSize[1] - plotTemplate.Axis[1].Offset[0]);
