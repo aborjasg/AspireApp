@@ -41,13 +41,12 @@ else
         deriveData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(response.Content))!;
 
         // processData:
-        response2 = await OrchestratorApi.processData(runImage);
-        Console.WriteLine($"API Response: [{response2.Type}] / {response2.Message} / {response2.Content}");
-       
-       /*
+        //response2 = await OrchestratorApi.processData(runImage);
+        //Console.WriteLine($"API Response: [{response2.Type}] / {response2.Message} / {response2.Content}");
+              
         // getRunImage:
         runImage = await OrchestratorApi.getRunImage(1);
         image = UtilsForMessages.Decompress(runImage.Content);
-       */
+       
     }
 }
