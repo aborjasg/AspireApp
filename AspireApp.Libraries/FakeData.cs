@@ -9,13 +9,14 @@ namespace AspireApp.Libraries
     {
         public static double[,] GetNcpData()
         {
-            var result = new bool[Constants.NUM_ROWS, Constants.NUM_COLS];
+            var result = new double[Constants.NUM_ROWS, Constants.NUM_COLS];
             var random = new Random();
 
             for (int k = 0; k < 200; k++)
-                result[random.Next(0, Constants.NUM_ROWS), random.Next(0, Constants.NUM_COLS)] = true;
+                result[random.Next(0, Constants.NUM_ROWS), random.Next(0, Constants.NUM_COLS)] = 1;
 
-            return (double[,])((Array)result).IsTrueGreaterThan(0);
+            //return (double[,])((Array)result).IsTrueGreaterThan(0);
+            return result;
         }
 
         public static double[,] GetLineChartData()

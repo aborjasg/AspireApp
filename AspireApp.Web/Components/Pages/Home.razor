@@ -3,6 +3,7 @@
 @using AspireApp.Libraries.Enums
 @using AspireApp.ServiceDefaults.Shared
 @using Newtonsoft.Json;
+@using System.Diagnostics
 
 @inject OrchestratorApiClient OrchestratorApi
 
@@ -16,9 +17,9 @@
 }
 else
 {    
-    <p><em>DerivedData: </em>[@deriveData.Name] / Count=@deriveData.PlotItems!.Count() </p>
-    <p><em>ProcessData: [@response2.Type] / @response2.Message</em></p>
-    <img src="@response2.Content" />
+    @* <p><em>DerivedData: </em>[@deriveData.Name] / Count=@deriveData.PlotItems!.Count() </p> *@
+    <p><em>ProcessData: [@response.Type] / @response.Message</em></p>
+    <img src="@response.Content" />
 }
 
 @if (!string.IsNullOrEmpty(image))
@@ -28,25 +29,26 @@ else
 }
 
 @code {
-    private ActionResponse response, response2;
+    private ActionResponse response;
     private DerivedData deriveData;
     private RunImage runImage;
     private string image = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        
+
         // getDerivedData:
-        response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined_NCP" });
-        deriveData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(response.Content))!;
+        //response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined_NCP" });
+        //deriveData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(response.Content))!;
+
+        // getRunImage:
+        runImage = await OrchestratorApi.getRunImage(2);
 
         // processData:
-        //response2 = await OrchestratorApi.processData(runImage);
-        //Console.WriteLine($"API Response: [{response2.Type}] / {response2.Message} / {response2.Content}");
+        response = await OrchestratorApi.processData(runImage);
+        image = response.Content;
+        Debug.WriteLine($"API Response: [{response.Type}] / {response.Message} / {response.Content}");
               
-        // getRunImage:
-        runImage = await OrchestratorApi.getRunImage(1);
-        image = UtilsForMessages.Decompress(runImage.Content);
-       
+        
     }
 }

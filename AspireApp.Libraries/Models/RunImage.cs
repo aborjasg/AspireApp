@@ -11,7 +11,7 @@ using System.Text.Json;
 namespace AspireApp.Libraries.Models;
 
 /// <summary>
-/// 
+///  
 /// </summary>
 public partial class RunImage : ModelBase
 {

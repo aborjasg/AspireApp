@@ -1,4 +1,5 @@
 ﻿using AspireApp.Libraries.Models;
+using AspireApp.ServiceDefaults.Shared;
 using System.Net.Http.Json;
 
 namespace AspireApp.Web
@@ -64,12 +65,16 @@ namespace AspireApp.Web
         /// <returns></returns>
         public async Task<RunImage> getRunImage(int id, CancellationToken cancellationToken = default)
         {
+            var runImage = new RunImage();
             var response = await httpClient.GetAsync($"/getRunImage/{id}");
             response.EnsureSuccessStatusCode();
             if (response.IsSuccessStatusCode)
-                return await response.Content.ReadFromJsonAsync<RunImage>(cancellationToken!);
-            else
-                return new RunImage();
+            {
+                var actionResponse = await response.Content.ReadFromJsonAsync<ActionResponse>(cancellationToken!);
+                if (actionResponse != null)
+                    runImage = UtilsForMessages.DeserializeObject<RunImage>(UtilsForMessages.Decompress(actionResponse!.Content))!;
+            }
+            return runImage;
         }
     }
 }

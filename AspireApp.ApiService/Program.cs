@@ -74,11 +74,11 @@ app.MapPost("/processData", (ConnectionString connectionString, RunImage record)
             {
                 var pictureEngine = new PictureEngine(pictureTemplate, derivedData, plotEngine!);
                 var image = pictureEngine.MakePicture()!;
-                var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
-                record = new RunImage(derivedData.Name, metadata, derivedData, image);
-
+                //var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
+                //record = new RunImage(derivedData.Name, metadata, derivedData, image);
+                //result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(record));
                 result.Message = "OK";
-                result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(record));
+                result.Content = image;
             }
             else
                 throw new Exception("PlotEngine invalid");
@@ -119,7 +119,11 @@ app.MapGet("/getRunImage/{id}", (ConnectionString connectionString, int id) =>
     try
     {
         var obj = new TableAccess<RunImage>(connectionString.FATCloud_Visualization);
-        record = obj.GetRow(id);
+              var temp = obj.GetRow(id);
+        if (temp is not null)
+            record = temp;
+        else
+           throw  new Exception("No row");
 
         result.Message = "OK";
         result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(record));
