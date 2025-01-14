@@ -49,14 +49,14 @@ app.MapPost("/getSourceData", (ConnectionString connectionString, DerivedDataFil
     return result;
 });
 
-app.MapPost("/processData", (ConnectionString connectionString, RunImage record) =>
+app.MapPost("/processData", (ConnectionString connectionString, DerivedDataFilter filter) =>
 {
-    var result = new ActionResponse() { Type = "Information", StartDate = DateTime.Now };    
+    var result = new RunImage();    
     try
     {
-        if (!string.IsNullOrEmpty(record.DataSource))
+        if (!string.IsNullOrEmpty(filter.CompressedDerivedData))
         {
-            var derivedData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(record.DataSource))!;
+            var derivedData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(filter.CompressedDerivedData))!;
             var dataEngine = new DataSourceEngine(derivedData.Name);
             var pictureTemplate = dataEngine.GetPictureTemplate();
             IPlotEngine? plotEngine = pictureTemplate.TestType switch
@@ -73,12 +73,9 @@ app.MapPost("/processData", (ConnectionString connectionString, RunImage record)
             if (plotEngine != null)
             {
                 var pictureEngine = new PictureEngine(pictureTemplate, derivedData, plotEngine!);
-                var image = pictureEngine.MakePicture()!;
-                //var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
-                //record = new RunImage(derivedData.Name, metadata, derivedData, image);
-                //result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(record));
-                result.Message = "OK";
-                result.Content = image;
+                var plotImage = pictureEngine.MakePicture()!;
+                var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
+                result.LoadData(derivedData.Name, metadata, derivedData, plotImage);                
             }
             else
                 throw new Exception("PlotEngine invalid");
@@ -88,10 +85,12 @@ app.MapPost("/processData", (ConnectionString connectionString, RunImage record)
     }
     catch (Exception ex)
     {
-        result.Type = "Error";
-        result.Message = ex.Message;
+        result.Content = ex.Message;
     }
-    result.EndDate = DateTime.Now;
+    finally
+    {
+        result.EndProcess = DateTime.Now;
+    }
     return result;
 });
 
@@ -101,7 +100,7 @@ app.MapPost("/saveRunImage", (ConnectionString connectionString, RunImage record
     try
     {
         var obj = new TableAccess<RunImage>(connectionString.FATCloud_Visualization);
-        result = new ActionResponse() { Type = "OK", Id = obj.SaveRow(record) };
+        result = new ActionResponse() { Message = "OK", Id = obj.SaveRow(record) };
     }
     catch (Exception ex)
     {

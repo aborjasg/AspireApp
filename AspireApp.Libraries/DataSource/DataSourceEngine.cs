@@ -27,7 +27,7 @@ namespace AspireApp.Libraries.DataSource
                 if (templates != null)
                 {
                     pictureTemplate = templates!.Where(x => x.Name == derivedData.Name)!.FirstOrDefault()!;
-                }
+                 }
             }
         }
 
@@ -103,7 +103,7 @@ namespace AspireApp.Libraries.DataSource
         {
             if (pictureTemplate != null)
                 derivedData.PlotItems = GetFakeDataSource(pictureTemplate);
-            return derivedData;
+            return derivedData; 
         }
 
         public PictureTemplate GetPictureTemplate() { return pictureTemplate; }

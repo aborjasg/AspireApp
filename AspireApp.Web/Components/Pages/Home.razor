@@ -11,44 +11,35 @@
 
 <h1>Home</h1>
 
-@if (response == null)
+@if (runImageNew != null)
 {
-    <p><em>Loading...</em></p>
-}
-else
-{    
-    @* <p><em>DerivedData: </em>[@deriveData.Name] / Count=@deriveData.PlotItems!.Count() </p> *@
-    <p><em>ProcessData: [@response.Type] / @response.Message</em></p>
-    <img src="@response.Content" />
+    <p><em>RunImage [New]:</em> @runImageNew.Name / @runImageNew.CreatedDate [@runImageNew.Duration] - @runImageNew.Length(runImageNew.Content)</p>
+    <img src="@imageNew" />
 }
 
-@if (!string.IsNullOrEmpty(image))
+@if (runImageSaved != null)
 {
-    <p>RunImage: @runImage.Name</p>
-    <img src="@image" />
+    <p><em>RunImage [Saved]:</em> @runImageSaved.Name / @runImageSaved.CreatedDate [@runImageSaved.Duration] - @runImageSaved.Length(runImageSaved.Content)</p>
+    <img src="@imageSaved" />
 }
 
 @code {
-    private ActionResponse response;
-    private DerivedData deriveData;
-    private RunImage runImage;
-    private string image = string.Empty;
+    private RunImage? runImageNew, runImageSaved;
+    private string imageNew = string.Empty, imageSaved = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
 
-        // getDerivedData:
-        //response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined_NCP" });
-        //deriveData = UtilsForMessages.DeserializeObject<DerivedData>(UtilsForMessages.Decompress(response.Content))!;
-
-        // getRunImage:
-        runImage = await OrchestratorApi.getRunImage(2);
-
+        // Case 1: getSourceData:
+        var response = await OrchestratorApi.getSourceData(new DerivedDataFilter() { Name = "Combined NCP (Picture)" });        
         // processData:
-        response = await OrchestratorApi.processData(runImage);
-        image = response.Content;
-        Debug.WriteLine($"API Response: [{response.Type}] / {response.Message} / {response.Content}");
-              
+        runImageNew = await OrchestratorApi.processData(new DerivedDataFilter() { CompressedDerivedData = response.Content });
+        imageNew = UtilsForMessages.Decompress(runImageNew!.Content);
+
+        // Case 2: getRunImage:
+        runImageSaved = await OrchestratorApi.getRunImage(1);
+        // processData:        
+        imageSaved = UtilsForMessages.Decompress(runImageSaved!.Content);
         
     }
 }
