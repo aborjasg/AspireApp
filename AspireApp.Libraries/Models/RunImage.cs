@@ -30,10 +30,11 @@ public partial class RunImage : ModelBase
 
     public RunImage() : base()
     {
+        StartProcess = DateTime.Now;
     }
 
-    public RunImage(string name, RunMetadata metadata, DerivedData derivedData, string plotImage) : this()
-    {
+    public void LoadData(string name, RunMetadata metadata, DerivedData derivedData, string plotImage)
+    {        
         Name = name;
         Metadata = JsonConvert.SerializeObject(metadata);
         DataSource = UtilsForMessages.Compress(JsonConvert.SerializeObject(derivedData));

@@ -6,11 +6,29 @@ using AspireApp.Libraries.PictureMaker;
 using AspireApp.ServiceDefaults.Shared;
 using Grpc.Core;
 using IdentityModel.OidcClient;
+using MathNet.Numerics;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
+using OpenIddict.Validation.AspNetCore;
 using System.Configuration;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mail;
 using System.Reflection.Metadata;
+using System.Security.Claims;
+using static OpenIddict.Abstractions.OpenIddictConstants;
+using static OpenIddict.Client.WebIntegration.OpenIddictClientWebIntegrationConstants;
 using static System.Net.Mime.MediaTypeNames;
 
 
@@ -25,6 +43,120 @@ builder.Services.AddSingleton<ConnectionString>(sp =>
 {
     return  new ConnectionString() { FATCloud_Visualization = builder.Configuration["ConnectionString:FATCloud_Visualization"]! }; 
 });
+
+//builder.Services.AddOpenIddict()
+//     .AddClient(options =>
+//      {
+//          options.UseAspNetCore()
+//                .DisableTransportSecurityRequirement();
+//      })
+//    .AddServer(options =>
+//    {
+//        options.AllowClientCredentialsFlow().AllowRefreshTokenFlow();
+//        options.AllowPasswordFlow().AllowRefreshTokenFlow();
+
+//        // Encryption and signing of tokens
+//        options
+//            .AddDevelopmentEncryptionCertificate()
+//            .AddDevelopmentSigningCertificate()
+//            .DisableAccessTokenEncryption();
+
+//        options
+//            .SetAuthorizationEndpointUris("/connect/authorize")
+//            .SetTokenEndpointUris("/connect/token");
+
+//        // Register the ASP.NET Core host and configure the ASP.NET Core options.
+//        options        
+//            .UseAspNetCore()
+//            .EnableTokenEndpointPassthrough()
+//            .EnableAuthorizationEndpointPassthrough();
+
+//        //var identityServer = builder.Configuration.GetSection("IdentityServer");
+//        //if (identityServer != null)
+//        //{
+//        //    options.SetAuthorizationEndpointUris(identityServer["endpoint_authorization"]!)
+//        //            //.SetLogoutEndpointUris("connect/logout")
+//        //            .SetTokenEndpointUris(identityServer["endpoint_token"]!);
+
+//        //    options.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
+
+//        //    options.AcceptAnonymousClients();
+//        //    options.AllowAuthorizationCodeFlow();
+
+//        //    options.UseAspNetCore()
+//        //        .DisableTransportSecurityRequirement();
+//        //    //.EnableAuthorizationEndpointPassthrough()               
+//        //    //.EnableTokenEndpointPassthrough();
+//        //}
+
+//    })
+//    .AddValidation(options =>
+//    {
+//        var identityServer = builder.Configuration.GetSection("IdentityServer");
+//        if (identityServer != null)
+//        {
+//            options.SetIssuer(identityServer["server_url"]!);
+//            options.AddEncryptionKey(new SymmetricSecurityKey(Convert.FromBase64String(identityServer["client_secret"]!)));
+//            options.UseSystemNetHttp();
+
+//            options.UseLocalServer();
+//            options.UseAspNetCore();
+//        }
+//    });
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+});
+
+
+
+builder.Services.AddSwaggerGen(swagger=>
+{
+    swagger.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title="AspireApp.API", Version="v1.0", Description="API endpoints"});
+});
+
+//builder.Services
+//    .AddAuthentication(options =>
+//    {
+//        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+//        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+//    })
+//    .AddCookie()
+//    .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+//    {
+//        var oidcConfig = builder.Configuration.GetSection("OpenIdConnect");
+//        options.Authority = oidcConfig["Authority"];
+//        options.ClientSecret = oidcConfig["ClientSecret"];
+//        options.ClientId = oidcConfig["ClientId"];
+//        options.ResponseType = OpenIdConnectResponseType.Code;
+
+//        options.Scope.Clear();
+//        options.Scope.Add("openid");
+//        options.Scope.Add("profile");
+//        options.Scope.Add("email");
+//        options.Scope.Add("offline_access");
+
+//        options.ClaimActions.Remove("amr");
+//        options.ClaimActions.MapUniqueJsonKey("website", "website");
+
+//        options.GetClaimsFromUserInfoEndpoint = true;
+//        options.SaveTokens = true;
+
+//        // .NET 9 feature
+//        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Require;
+
+//        options.TokenValidationParameters.NameClaimType = "name";
+//        options.TokenValidationParameters.RoleClaimType = "role";
+//    }); 
+
+//var requireAuthPolicy = new AuthorizationPolicyBuilder()
+//    .RequireAuthenticatedUser()
+//    .Build();
+
+//builder.Services.AddAuthorizationBuilder()
+//    .SetFallbackPolicy(requireAuthPolicy);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -32,7 +164,7 @@ app.UseExceptionHandler();
 
 app.MapPost("/getSourceData", (ConnectionString connectionString, DerivedDataFilter filter) =>
 {
-    var result = new ActionResponse() { Type = "Information", StartDate = DateTime.Now };
+    var result = new ActionResponse();
     try
     {
         var engine = new DataSourceEngine(filter.Name);
@@ -51,7 +183,8 @@ app.MapPost("/getSourceData", (ConnectionString connectionString, DerivedDataFil
 
 app.MapPost("/processData", (ConnectionString connectionString, DerivedDataFilter filter) =>
 {
-    var result = new RunImage();    
+    var result = new ActionResponse();
+    var record = new RunImage();    
     try
     {
         if (!string.IsNullOrEmpty(filter.CompressedDerivedData))
@@ -75,7 +208,11 @@ app.MapPost("/processData", (ConnectionString connectionString, DerivedDataFilte
                 var pictureEngine = new PictureEngine(pictureTemplate, derivedData, plotEngine!);
                 var plotImage = pictureEngine.MakePicture()!;
                 var metadata = new RunMetadata(derivedData.Name, pictureTemplate);
-                result.LoadData(derivedData.Name, metadata, derivedData, plotImage);                
+                record.LoadData(derivedData.Name, metadata, derivedData, plotImage);
+                record.EndProcess = DateTime.Now;
+
+                result.Message = "OK";
+                result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(record));
             }
             else
                 throw new Exception("PlotEngine invalid");
@@ -85,22 +222,21 @@ app.MapPost("/processData", (ConnectionString connectionString, DerivedDataFilte
     }
     catch (Exception ex)
     {
-        result.Content = ex.Message;
+        result.Type = "Error";
+        result.Message = ex.Message;
     }
-    finally
-    {
-        result.EndProcess = DateTime.Now;
-    }
+    result.EndDate = DateTime.Now;    
     return result;
 });
 
 app.MapPost("/saveRunImage", (ConnectionString connectionString, RunImage record) =>
 {
-    var result = new ActionResponse() { Type = "Information", StartDate = DateTime.Now };
+    var result = new ActionResponse();
     try
     {
         var obj = new TableAccess<RunImage>(connectionString.FATCloud_Visualization);
-        result = new ActionResponse() { Message = "OK", Id = obj.SaveRow(record) };
+        result.Id = obj.SaveRow(record);
+        result.Message = "Saved successfully";
     }
     catch (Exception ex)
     {
@@ -113,7 +249,7 @@ app.MapPost("/saveRunImage", (ConnectionString connectionString, RunImage record
 
 app.MapGet("/getRunImage/{id}", (ConnectionString connectionString, int id) =>
 {
-    var result = new ActionResponse() { Type = "Information", StartDate = DateTime.Now };
+    var result = new ActionResponse();
     var record = new RunImage();
     try
     {
@@ -124,6 +260,7 @@ app.MapGet("/getRunImage/{id}", (ConnectionString connectionString, int id) =>
         else
            throw  new Exception("No row");
 
+        record.EndProcess = DateTime.Now;
         result.Message = "OK";
         result.Content = UtilsForMessages.Compress(UtilsForMessages.SerializeObject(record));
     }
@@ -136,6 +273,15 @@ app.MapGet("/getRunImage/{id}", (ConnectionString connectionString, int id) =>
     return result;
 });
 
+app.UseSwagger(options => options.SerializeAsV2 = true);
+app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "AspireApp API"));
+
 app.MapDefaultEndpoints();
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+//app.UseAuthentication();
+//app.UseAuthorization();
 
 app.Run();

@@ -26,6 +26,23 @@ namespace AspireApp.Libraries.Models
         /// 
         /// </summary>
         public DateTime? UpdatedDate { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public DateTime StartProcess { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public DateTime EndProcess { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public TimeSpan Duration => (EndProcess > StartProcess ? EndProcess.Subtract(StartProcess): TimeSpan.Zero);
+
+        public string Length(string content)
+        {
+            return $"{content.Length} bytes / {Math.Round((decimal)content.Length / 1024, 2)} KB";
+        }
 
         public ModelBase()
         {

@@ -18,6 +18,12 @@ namespace AspireApp.Libraries.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public TimeSpan Duration => EndDate.Subtract(StartDate);
-        public string ContentLenght => $"{Content.Length} bytes / {Math.Round((decimal)Content.Length / 1024, 2)} KB";        
+        public string ContentLenght => $"{Content.Length} bytes / {Math.Round((decimal)Content.Length / 1024, 2)} KB";
+
+        public ActionResponse()
+        {
+            StartDate = DateTime.Now;
+            Type = "Information";
+        }
     }
 }
