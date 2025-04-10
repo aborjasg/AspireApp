@@ -51,7 +51,7 @@ namespace AspireApp.Libraries
 								int[] dims = array.GetDimensions();
 								if (kvp.Key.Equals("Cc_data"))
 								{//this is a big array, so do not write out, please use ArrayExtensions.ToString2() to get all of array elemment
-									writer.WriteStringValue($"{array.GetType().GetElementType().Name}{dims.ToString2()}, Sinse this is big array, Json cann't support over 166MB token size, so just show its dimensions. Use Cc_data.ToString2() to get all of them");
+									writer.WriteStringValue($"{array.GetType().GetElementType()!.Name}{dims.ToString2()}, Sinse this is big array, Json cann't support over 166MB token size, so just show its dimensions. Use Cc_data.ToString2() to get all of them");
 								}
 								else
 								{
@@ -70,7 +70,7 @@ namespace AspireApp.Libraries
 										for (int j = 0; j < dims[^1]; j++)
 										{
 											Indices[^1] = j;
-											writer.WriteStringValue(array.GetValue(Indices).ToString());
+											writer.WriteStringValue(array.GetValue(Indices)!.ToString());
 										}
 										//clear last dimension's index
 										Indices[^1] = 0;
@@ -237,7 +237,7 @@ namespace AspireApp.Libraries
 			// If the property name is found in a dictionary,
 			// set the result parameter to the property value and return true.
 			// Otherwise, return false.
-			return _dictionary.TryGetValue(binder.Name, out result);
+			return _dictionary.TryGetValue(binder.Name, out result!);
 		}
 
 		/// <summary>
@@ -247,12 +247,12 @@ namespace AspireApp.Libraries
 		/// <param name="binder"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public override bool TrySetMember(SetMemberBinder binder, object value)
+		public override bool TrySetMember(SetMemberBinder binder, object? value)
 		{
 			// Converting the property name to lowercase
 			// so that property names become case-insensitive.
 			//_dictionary[binder.Name.ToLower()] = value;
-			_dictionary[binder.Name] = value;
+			_dictionary[binder.Name] = value!;
 
 			// You can always add a value to a dictionary,
 			// so this method always returns true.

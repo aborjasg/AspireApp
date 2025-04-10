@@ -22,7 +22,7 @@
 }
 
 @code {
-    private RunImage? runImageNew, runImageSaved;
+    private RunImage? runImageNew; //, runImageSaved;
     private string imageNew = string.Empty, imageSaved = string.Empty;
     private List<RunImage> runImage_list = new ();
 
@@ -61,8 +61,11 @@
             {
                 var responseProcessData = await OrchestratorApi.processData(new DerivedDataFilter() { CompressedDerivedData = responseGetDerivedData.Content });
                 runImageNew = UtilsForMessages.DeserializeObject<RunImage>(UtilsForMessages.Decompress(responseProcessData!.Content));
-                runImageNew!.Content = UtilsForMessages.Decompress(runImageNew!.Content);
-                runImage_list.Add(runImageNew);
+                if (runImageNew != null)
+                {
+                    runImageNew!.Content = UtilsForMessages.Decompress(runImageNew!.Content);
+                    runImage_list.Add(runImageNew);
+                }
             }
         }
 

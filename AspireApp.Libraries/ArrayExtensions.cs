@@ -33,7 +33,7 @@ namespace AspireApp.Libraries
 		/// <param name="array">this.array, input array</param>
 		/// <param name="indices">Indices that map to elements in this.array</param>
 		/// <returns>Returns the values from the specified indices</returns>
-		public static Array GetValue(this Array array, int?[] indices = null)
+		public static Array GetValue(this Array array, int?[] indices)
 		{
 			int selectedIndex = -1;
 
@@ -51,7 +51,7 @@ namespace AspireApp.Libraries
 
 			for (int d1 = 0; d1 < lenD1; d1++)
 			{
-				result[d1] = (double)array.GetValue(d1, (int)indices[1], (int)indices[2], (int)indices[3]);
+				result[d1] = (double)array.GetValue(d1, (int)indices[1]!, (int)indices[2]!, (int)indices[3]!)!;
 			}
 			return result;
 		}
@@ -95,7 +95,7 @@ namespace AspireApp.Libraries
 		/// <param name="src">Source array</param>
 		/// <param name="indices">indices to set value in this.array from src. Null means for all members to be set. Ex. [null, -1, null, null], [0,2,1,3]</param>
 		/// <returns>Returns true if values were successfully set. Returns false if dimensions between this array and src are not correct</returns>
-		public static bool SetValue(this Array array, Array src, int?[] indices = null)
+		public static bool SetValue(this Array array, Array src, int?[] indices)
 		{
 			bool bRcd = false;
 			if ((array != null) && (src != null))
@@ -153,7 +153,7 @@ namespace AspireApp.Libraries
 							}
 							else
 							{
-								int ntemp = (int)indices[i];
+								int ntemp = (int)indices[i]!;
 								if (ntemp < 0)
 								{// -1, -2.....
 									ntemp = thisDims[i] + ntemp;
@@ -306,24 +306,24 @@ namespace AspireApp.Libraries
 		/// <param name="src">source data to set it to this array, it can a scalar (Ex. int double...) or an array. See example to find out how this array should be </param>
 		/// <param name="sliceIndices">slice indices to be used for setting data, null:set all values of this array. not null: the length of this must same as array's dimensions</param>
 		/// <returns></returns>
-		public static bool SetValue2(this Array array, object src, int?[] sliceIndices = null)
+		public static bool SetValue2(this Array array, object src, int?[]? sliceIndices=null)
 		{
 			bool bRcd = false;
 			if ((array != null) && (src != null))
 			{
 				int[] thisDims = array.GetDimensions();
-				Type thisElementType = array.GetType().GetElementType();
+				Type thisElementType = array.GetType().GetElementType()!;
 				//check the src type
 				Type oTypeSrc = src.GetType();
-				Array aSrc = null;
-				object vSrc = null;
-				int[] srcDims = null;
-				Type srcElementType = null;
+				Array? aSrc = null;
+				object? vSrc = null;
+				int[]? srcDims = null;
+				Type? srcElementType = null;
 				if (oTypeSrc.IsArray)
 				{
-					aSrc = src as Array;
+					aSrc = (src as Array)!;
 					srcDims = aSrc.GetDimensions();
-					srcElementType = aSrc.GetType().GetElementType();
+					srcElementType = aSrc.GetType().GetElementType()!;
 				}
 				else if (src.GetType().IsValueType)
 				{
@@ -345,7 +345,7 @@ namespace AspireApp.Libraries
 					{   //copy all elements from src to this array
 						if (aSrc != null)
 						{   //copy aSrc to this array
-							if ((srcDims.Length == thisDims.Length) &&
+							if ((srcDims!.Length == thisDims.Length) &&
 								(srcDims.SequenceEqual(thisDims)))  //aSrc dism must equal thisDims
 							{//total same dimension, check it for indices == null,
 								if (thisElementType.Equals(srcElementType))
@@ -397,7 +397,7 @@ namespace AspireApp.Libraries
 							{   //all element value will be >=0&&<thisDims[i]
 								if (aSrc != null)
 								{   //copy src to sepecific position of this array
-									if (srcDims.Length <= thisDims.Length)
+									if (srcDims!.Length <= thisDims.Length)
 									{   //at least one null in indices, if not src must be scalar--> it means set one element only
 										int nNoNull = sliceIndices.Count(o => o == null);
 										if (srcDims.Length <= nNoNull)
@@ -511,7 +511,7 @@ namespace AspireApp.Libraries
 					}
 					else
 					{
-						array[i] = (int)sliceIndices[i];
+						array[i] = (int)sliceIndices[i]!;
 					}
 				}
 			}
@@ -527,7 +527,7 @@ namespace AspireApp.Libraries
 		/// <param name="dims">dims for this array for speed up</param>
 		/// <param name="Indices">indices array. for speed up</param>
 		/// <returns>Returns an int[] array with an index table of this.array</returns>
-		public static int[] GetIndices(this Array array, long index, bool bMemorySequnce = true, int[] dims = null, int[] Indices = null)
+		public static int[] GetIndices(this Array array, long index, bool bMemorySequnce = true, int[]? dims=null, int[]? Indices=null)
 		{
 			int CalcRemainder(int nSize)
 			{
@@ -537,7 +537,7 @@ namespace AspireApp.Libraries
 				return (int)nTemp;
 			};
 
-			int[] oRcd = Indices;
+			int[]? oRcd = Indices;
 			//make inexes for this index
 			if (oRcd == null)
 			{
@@ -577,7 +577,7 @@ namespace AspireApp.Libraries
 					oRcd[i] = CalcRemainder(dims[i]);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -589,7 +589,7 @@ namespace AspireApp.Libraries
 		public static object GetAt(this Array array, long index)
 		{
 			var anIndexes = array.GetIndices(index, true);
-			return array.GetValue(anIndexes);
+			return array.GetValue(anIndexes)!;
 		}
 
 		/// <summary>
@@ -612,7 +612,7 @@ namespace AspireApp.Libraries
 			//for finding we are using MKL
 			//string strMKL = MathNet.Numerics.Providers.LinearAlgebra.LinearAlgebraControl.Provider.ToString();
 
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) &&
 				(array.Length > 0))
 			{
@@ -631,8 +631,8 @@ namespace AspireApp.Libraries
 				}
 
 				//check the item data type
-				Type typeArray = array.GetType().GetElementType();
-				Type typeNew = oRcd.GetType().GetElementType(); //==typeof(T)
+				Type typeArray = array.GetType().GetElementType()!;
+				Type typeNew = oRcd.GetType().GetElementType()!; //==typeof(T)
 				if (typeArray == typeNew)
 				{//same type, so just copy it.
 					Buffer.BlockCopy(array, 0, oRcd, 0, Buffer.ByteLength(array));
@@ -648,7 +648,7 @@ namespace AspireApp.Libraries
 					{
 						//TargetIndices = oRcd.GetIndices(i, true, targetDims, TargetIndices);
 						//SourceIndices = array.GetIndices(i, true, thisDims, SourceIndices);
-						oRcd.SetValue((T)Convert.ChangeType(array.GetValue(SourceIndices), typeof(T)), TargetIndices);
+						oRcd.SetValue((T)Convert.ChangeType(array.GetValue(SourceIndices), typeof(T))!, TargetIndices);
 						SourceIndices = SourceIndices.Increament(thisDims);
 						TargetIndices = TargetIndices.Increament(targetDims);
 					}
@@ -658,7 +658,7 @@ namespace AspireApp.Libraries
 					//int nDstSize = Buffer.ByteLength(oRcd) / oRcd.Length;
 
 					////following code is slow, Array.GetValue(i) takes long time 
-					////Array oTemp = Array.CreateInstance(array.GetType().GetElementType(), array.Length);
+					////Array oTemp = Array.CreateInstance(array.GetType().GetElementType()!, array.Length);
 					////Buffer.BlockCopy(array,0, oTemp, 0, Buffer.ByteLength(array));
 					//////Array.ConvertAll< Array,T >(oTemp, (x) => (T)Convert.ChangeType(x, typeof(T)));
 					////for (int i = 0; i < oRcd.Length; i++)
@@ -760,7 +760,7 @@ namespace AspireApp.Libraries
 				//}
 
 				//types
-				//Type typeArray = array.GetType().GetElementType();
+				//Type typeArray = array.GetType().GetElementType()!;
 				//Type typeNew = oRcd.GetType().GetElementType();
 				//if (typeArray == typeNew)
 				//{//same type, so just copy it.
@@ -823,7 +823,7 @@ namespace AspireApp.Libraries
 				//gchArray.Free();
 				//gchNew.Free();
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -840,7 +840,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns a flipped array along a given axis.</returns>
 		public static object Flip(this Array array, int nAxis = 1)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) &&
 				(array.Length > 1))
 			{
@@ -852,7 +852,7 @@ namespace AspireApp.Libraries
 				if ((nAxis >= 0) && (nAxis < dims.Length))
 				{
 					//create new onw
-					Array oTemp = Array.CreateInstance(array.GetType().GetElementType(), dims);
+					Array oTemp = Array.CreateInstance(array.GetType().GetElementType()!, dims);
 					oRcd = oTemp;
 					int[] Indices = new int[dims.Length];
 					Array.Clear(Indices, 0, Indices.Length);
@@ -861,7 +861,7 @@ namespace AspireApp.Libraries
 					{
 						//give GetIndices() dims & nIndexies to make it speed up
 						//Indices = array.GetIndices(i, true, dims, Indices);
-						object data = array.GetValue(Indices);
+						object data = array.GetValue(Indices)!;
 						Buffer.BlockCopy(Indices, 0, TargetIndices, 0, Buffer.ByteLength(Indices));
 						TargetIndices[nAxis] = dims[nAxis] - TargetIndices[nAxis] - 1;
 						//if (nIndexes[nAxis] > (dims[nAxis] - 1))
@@ -873,7 +873,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -915,9 +915,9 @@ namespace AspireApp.Libraries
 		/// <param name="array">this.array containing numbers whose sum is desired</param>
 		/// <param name="axises">a set of axes as an int[]</param>
 		/// <returns>Returns a double[,...], or a double</returns>
-		public static object NanSum(this Array array, int[] axises = null)
+		public static object NanSum(this Array array, int[]? axises = null)
 		{
-			return NanByAxis(array, axises, (data) => data.Aggregate((total, next) => total + next), true);
+			return NanByAxis(array, axises!, (data) => data.Aggregate((total, next) => total + next), true);
 		}
 
 		/// <summary>
@@ -939,9 +939,9 @@ namespace AspireApp.Libraries
 		/// <param name="array">this array</param>
 		/// <param name="axises">axises, null: return a minimum value of whole array</param>
 		/// <returns>minimum value(s) (double or double[,...])</returns>
-		public static object NanMin(this Array array, int[] axises = null)
+		public static object NanMin(this Array array, int[]? axises)
 		{
-			return NanByAxis(array, axises, (data) => data.MinBy(x => x), true);
+			return NanByAxis(array, axises!, (data) => data.MinBy(x => x), true);
 		}
 
 		/// <summary>
@@ -963,9 +963,9 @@ namespace AspireApp.Libraries
 		/// <param name="array">this array</param>
 		/// <param name="axises">axises, null: return a maximum value of whole array</param>
 		/// <returns>mxaimum value(s)(double or double[,...])</returns>
-		public static object NanMax(this Array array, int[] axises = null)
+		public static object NanMax(this Array array, int[]? axises = null)
 		{
-			return NanByAxis(array, axises, (data) => data.MaxBy(x => x), true);
+			return NanByAxis(array, axises!, (data) => data.MaxBy(x => x), true);
 		}
 
 		/// <summary>
@@ -984,7 +984,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static object NanCumSum(this Array array, int? nAxis = null)
 		{
-			object oRcd = null;
+			object? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				var dims = array.GetDimensions();
@@ -1038,7 +1038,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -1057,7 +1057,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns a single bool var if axis is null or a bool[]</returns>
 		public static object Any(this Array array, int? nAxis = null)
 		{
-			object oRcd = null;
+			object? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				var dims = array.GetDimensions();
@@ -1116,7 +1116,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -1150,9 +1150,9 @@ namespace AspireApp.Libraries
 		/// <param name="array">Array containing numbers whose mean is desired</param>
 		/// <param name="axes">Array axis along which the mean is computed. If the axis does not appear in this array, return mean of all the elements</param>
 		/// <returns>Returns a double[], or a double with the mean of the array elements</returns>
-		public static object NanMean(this Array array, int[] axes = null)
+		public static object NanMean(this Array array, int[]? axes = null)
 		{
-			return NanByAxis(array, axes, (data) => Statistics.Mean(data), true);
+			return NanByAxis(array, axes!, (data) => Statistics.Mean(data), true);
 		}
 
 		/// <summary>
@@ -1186,9 +1186,9 @@ namespace AspireApp.Libraries
 		/// <param name="array">this.array</param>
 		/// <param name="axes">Array axes, an int[], along which the medians is to be computed. If the axes do not appear in this array, return median of whole elements</param>
 		/// <returns>Returns a double[], or a double containing the median of the array elements</returns>
-		public static object NanMedian(this Array array, int[] axes = null)
+		public static object NanMedian(this Array array, int[]? axes = null)
 		{
-			return NanByAxis(array, axes, (data) => Statistics.Median(data), true);
+			return NanByAxis(array, axes!, (data) => Statistics.Median(data), true);
 		}
 
 		/// <summary>
@@ -1224,14 +1224,14 @@ namespace AspireApp.Libraries
 		/// <param name="axes">Array axes, and int[], along which the standard deviations are computed. If the axes do not appear in this array, return standard deviation of whole elements</param>
 		/// <param name="ddof">int, optional. Means Delta Degrees of Freedom. The divisor used in calculations is N - ddof, where N represents the number of non-NaN elements. By default ddof is zero. 0: use population standard deviation, 1: use normal standard diviation</param>
 		/// <returns>Returns a double[], or a double containing the standard deviation of the array elements. If ddof is >= the number of non-NaN elements in a slice or the slice contains only NaNs, then the result for that slice is NaN.</returns>
-		public static object NanStd(this Array array, int[] axes = null, int ddof = 0)
+		public static object NanStd(this Array array, int[]? axes = null, int ddof = 0)
 		{
 			Func<double[], double> func = (data) => Statistics.PopulationStandardDeviation(data);
 			if (ddof != 0)
 			{
 				func = (data) => Statistics.StandardDeviation(data);
 			}
-			return NanByAxis(array, axes, func, true);
+			return NanByAxis(array, axes!, func, true);
 		}
 
 		/// <summary>
@@ -1264,9 +1264,9 @@ namespace AspireApp.Libraries
 		/// </param>
 		/// <param name="axes">Axes along which the quantiles are computed. null : return quantile bases all elements.</param>
 		/// <returns></returns>
-		public static object Quantile(this Array array, double[] Quantile, int[] axes = null)
+		public static object Quantile(this Array array, double[] Quantile, int[]? axes = null)
 		{
-			object oRcd = null;
+			object? oRcd = null;
 			if ((Quantile != null) && (Quantile.Length > 0))
 			{
 				//all Quantile must be in 0.0 to 1.0
@@ -1308,10 +1308,10 @@ namespace AspireApp.Libraries
 						double dIndex = Quantile[i] * (oTemp.Length - 1);
 						int nIndex = (int)Math.Floor(dIndex);
 						double dFraction = dIndex - nIndex;
-						double dValue1 = (double)oTemp.GetValue(nIndex);
+						double dValue1 = (double)oTemp.GetValue(nIndex)!;
 						if ((dFraction > double.Epsilon) && (nIndex < (oTemp.Length - 1)))
 						{//dFraction is not 0
-							double dValue2 = (double)oTemp.GetValue(nIndex + 1);
+							double dValue2 = (double)oTemp.GetValue(nIndex + 1)!;
 							dValue1 += (dValue2 - dValue1) * dFraction;
 						}
 						oRcdTemp.SetValue(i, dValue1);
@@ -1384,10 +1384,10 @@ namespace AspireApp.Libraries
 							double dIndex = Quantile[i] * (dtemps.Length - 1);
 							int nIndex = (int)Math.Floor(dIndex);
 							double dFraction = dIndex - nIndex;
-							double dValue1 = (double)dtemps.GetValue(nIndex);
+							double dValue1 = (double)dtemps.GetValue(nIndex)!;
 							if ((dFraction > double.Epsilon) && (nIndex < (dtemps.Length - 1)))
 							{//dFraction is not 0
-								double dValue2 = (double)dtemps.GetValue(nIndex + 1);
+								double dValue2 = (double)dtemps.GetValue(nIndex + 1)!;
 								dValue1 += (dValue2 - dValue1) * dFraction;
 							}
 							Indices[^1] = i;
@@ -1406,7 +1406,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -1451,7 +1451,7 @@ namespace AspireApp.Libraries
 		/// <returns>Normalized Axes in <c>int[]</c></returns>
 		public static int[] NormalizeAxes(this int[] array, int nRank)
 		{
-			int[] oRcd = null;
+			int[]? oRcd = null;
 			if (array != null)
 			{
 				for (int i = 0; i < array.Length; i++)
@@ -1467,9 +1467,9 @@ namespace AspireApp.Libraries
 					array[i] = array[i].NormalizeAxis(nRank);
 				}
 				// no same value in this array
-				oRcd = array?.Distinct().ToArray();
+				oRcd = array?.Distinct().ToArray()!;
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -1510,14 +1510,14 @@ namespace AspireApp.Libraries
 		/// <returns>Returns part of an array over a given range(s)</returns>
 		public static object PartOf(this Array array, object[] ranges, bool bKeepOriginalDimesions = false)
 		{
-			object oRcd = null;
+			object? oRcd = null;
             if ((array != null) && (array.Length > 0))
             {
                 var dims = array.GetDimensions();
                 //object data = array.GetAt(0);
                 if ((ranges == null) || (ranges.Length <= 0))
                 {//return a copy of current array
-                    oRcd = Array.CreateInstance(array.GetType().GetElementType(), dims);
+                    oRcd = Array.CreateInstance(array.GetType().GetElementType()!, dims);
                     Buffer.BlockCopy(array, 0, (Array)oRcd, 0, Buffer.ByteLength(array));
                 }
                 else
@@ -1550,7 +1550,7 @@ namespace AspireApp.Libraries
                             }
                             else if (ranges[i] is int[] oIdeces)
                             {
-                                int[] indecesTemp = null;
+                                int[]? indecesTemp = null;
                                 if (oIdeces.Length <= 0)
                                 {// try do right things
                                     indecesTemp = new int[] { 0 };
@@ -1573,7 +1573,7 @@ namespace AspireApp.Libraries
                     //newDims = newDims.Where(x => x > 0).ToArray();
                     if (newDims.Length > 0)
                     {
-                        var targetArray = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+                        var targetArray = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
                         oRcd = targetArray;
 
                         //case 0: without Parallel.For()
@@ -1684,7 +1684,7 @@ namespace AspireApp.Libraries
                         oRcd = (double)array.GetAt(0);
                 }
             }
-            return oRcd;
+            return oRcd!;
         }
 
 		/// <summary>
@@ -1701,7 +1701,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns the input array, but with all or a subset of the dimensions of length 1 removed. If length of nAxis is not one, return null</returns>
 		public static Array Squeeze(this Array array, int? nAxis = null)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				bool bCopy = false;
@@ -1720,7 +1720,7 @@ namespace AspireApp.Libraries
 				 //delete 1 length dimensions
 					oRcd = array;
 					var previousLen = dims.Length;
-					int[] newdims = dims?.Where(e => e > 1).ToArray();
+					int[] newdims = dims?.Where(e => e > 1).ToArray()!;
 					if ((newdims.Length > 0) && //for [1,1,1,..] may keep it
 						(newdims.Length < previousLen))
 					{
@@ -1729,7 +1729,7 @@ namespace AspireApp.Libraries
 					}
 					else if (newdims.Length == 0)
 					{
-						oRcd = Array.CreateInstance(array.GetType().GetElementType(), new int[] { 1 });
+						oRcd = Array.CreateInstance(array.GetType().GetElementType()!, new int[] { 1 });
 						oRcd.SetValue(array.GetAt(0), 0);
 					}
 				}
@@ -1737,11 +1737,11 @@ namespace AspireApp.Libraries
 				{
 					//var data = array.GetAt(0);
 					//if the array is bool array.GetAt(0) returen bool but its byte size is 2 not 1, so do not use array.Get(0) to get determin it element size
-					oRcd = Array.CreateInstance(array.GetType().GetElementType(), dims);
+					oRcd = Array.CreateInstance(array.GetType().GetElementType()!, dims!);
 					Buffer.BlockCopy(array, 0, oRcd, 0, Buffer.ByteLength(array));
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -1761,7 +1761,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns the concatenated array</returns>
 		public static Array Concatenate(this Array array, Array src, int? nAxis = null)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0) &&
 				(src != null) && (src.Length > 0))
 			{
@@ -1774,7 +1774,7 @@ namespace AspireApp.Libraries
 					if ((nAxis == null) || // to return a one dimensional array
 						((thisDims.Length == 1) && (srcDims.Length == 1)))  //current arry's are all one dimension.
 					{
-						oRcd = Array.CreateInstance(array.GetType().GetElementType(), new int[] { array.Length + src.Length });
+						oRcd = Array.CreateInstance(array.GetType().GetElementType()!, new int[] { array.Length + src.Length });
 						int bytes = Buffer.ByteLength(array);
 						Buffer.BlockCopy(array, 0, oRcd, 0, bytes);
 						Buffer.BlockCopy(src, 0, oRcd, bytes, Buffer.ByteLength(src));
@@ -1804,7 +1804,7 @@ namespace AspireApp.Libraries
 								Array.Copy(thisDims, 0, newDims, 0, thisDims.Length);
 								newDims[nIndex] += srcDims[nIndex];
 								//create new array
-								oRcd = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+								oRcd = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 								//for (var i = 0; i < newDims.Length; i++)
 								//{
 								//	newDims[i] = thisDims[i];
@@ -1925,7 +1925,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -1943,7 +1943,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an array whose axes are swapped with the given axes</returns>
 		public static Array SwapAxes(this Array array, int nAxis1, int nAxis2)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] thisDims = array.GetDimensions();
@@ -1977,10 +1977,10 @@ namespace AspireApp.Libraries
 						};
 					}
 					//create new array
-					oRcd = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+					oRcd = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 					for (var i = 0; i < oRcd.Length; i++)
 					{
-						object oData = array.GetValue(thisIndex);
+						object oData = array.GetValue(thisIndex)!;
 						//create an index for new array
 						int[] newIndex = new int[thisIndex.Length];
 						Array.Copy(thisIndex, 0, newIndex, 0, thisIndex.Length);
@@ -1990,7 +1990,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2008,7 +2008,7 @@ namespace AspireApp.Libraries
 		/// <returns>Return an array with moved axes. This array is a view of the input array</returns>
 		public static Array MoveAxis(this Array array, int nAxisSource, int nAxisDestination)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] thisDims = array.GetDimensions();
@@ -2042,10 +2042,10 @@ namespace AspireApp.Libraries
 						};
 					}
 					//create new array
-					oRcd = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+					oRcd = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 					for (var i = 0; i < oRcd.Length; i++)
 					{
-						object oData = array.GetValue(thisIndex);
+						object oData = array.GetValue(thisIndex)!;
 						//create an index for new array
 						int[] newIndex = new int[thisIndex.Length];
 						Array.Copy(thisIndex, 0, newIndex, 0, thisIndex.Length);
@@ -2055,7 +2055,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2131,15 +2131,15 @@ namespace AspireApp.Libraries
 		/// <returns>Returns a copy of the input array, flattened to one dimension</returns>
 		public static Array To1D(this Array array)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				//var thisData = array.GetAt(0);
-				oRcd = Array.CreateInstance(array.GetType().GetElementType(), new int[] { array.Length });
+				oRcd = Array.CreateInstance(array.GetType().GetElementType()!, new int[] { array.Length });
 				int bytes = Buffer.ByteLength(array);
 				Buffer.BlockCopy(array, 0, oRcd, 0, bytes);
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2154,7 +2154,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns a copy of the input array with a single dimension added to it</returns>
 		public static List<Array> Add_1D(this Array array)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] thisDims = array.GetDimensions();
@@ -2165,11 +2165,11 @@ namespace AspireApp.Libraries
 				{
 					newDims[i + 1] = thisDims[i];
 				}
-				oRcd = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+				oRcd = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 				int bytes = Buffer.ByteLength(array);
 				Buffer.BlockCopy(array, 0, oRcd, 0, bytes);
 			}
-			return new List<Array>() { oRcd };
+			return new List<Array>() { oRcd! };
 		}
 
 		/// <summary>
@@ -2186,7 +2186,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns a view of the array transposed</returns>
 		public static object Transpose(this Array array, bool b1Dto2D = false)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] thisDims = array.GetDimensions();
@@ -2195,7 +2195,7 @@ namespace AspireApp.Libraries
 				{//not transpose for 1D
 					if (b1Dto2D)
 					{//to 2D
-						oRcd = Array.CreateInstance(array.GetType().GetElementType(), new int[] { array.Length, 1 });
+						oRcd = Array.CreateInstance(array.GetType().GetElementType()!, new int[] { array.Length, 1 });
 						int bytes = Buffer.ByteLength(array);
 						Buffer.BlockCopy(array, 0, oRcd, 0, bytes);
 					}
@@ -2222,11 +2222,11 @@ namespace AspireApp.Libraries
 					//	};
 					//}
 					//create new array
-					oRcd = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+					oRcd = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 					int[] newIndex = new int[thisDims.Length];
 					for (var i = 0; i < oRcd.Length; i++)
 					{
-						object oData = array.GetValue(thisIndex);
+						object oData = array.GetValue(thisIndex)!;
 						//int[] newIndex = (int[])thisIndex.Copy<int>();
 						Buffer.BlockCopy(thisIndex, 0, newIndex, 0, Buffer.ByteLength(thisIndex));
 						Array.Reverse(newIndex);
@@ -2236,7 +2236,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2254,7 +2254,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns a view of the array with axes transposed. null : dimensions is not correct.</returns>
 		public static object Transpose(this Array array, int[] dimensions)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				if (dimensions == null)
@@ -2290,7 +2290,7 @@ namespace AspireApp.Libraries
 						//}
 						//int[] targetIndices = new int[thisDims.Length];
 						//create new array
-						oRcd = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+						oRcd = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 						int[] SourceIndices = new int[thisDims.Length];
 						Array.Clear(SourceIndices, 0, SourceIndices.Length);
 						int[] TargetIndices = new int[newDims.Length];
@@ -2299,7 +2299,7 @@ namespace AspireApp.Libraries
 						{
 							//SourceIndices = array.GetIndices(i, true, thisDims, SourceIndices);
 							//TargetIndices = oRcd.GetIndices(i, true, newDims, TargetIndices);
-							object oData = array.GetValue(SourceIndices);
+							object oData = array.GetValue(SourceIndices)!;
 							//int[] newIndex = (int[])thisIndex.Copy<int>();
 							//for (int k = 0; k < dimensions.Length; k++)
 							//	targetIndices[k] = sourceIndex[dimensions[k]];
@@ -2315,7 +2315,7 @@ namespace AspireApp.Libraries
 				}
 
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2353,7 +2353,7 @@ namespace AspireApp.Libraries
         /// <returns>Returns the different of array1 and array2, element-wise</returns>
         public static Array Sub(this Array array, object data, bool bReverse = false)
         {
-            Func<double, double, double> func = null;
+            Func<double, double, double>? func = null;
             if (bReverse)
             {
                 func = (data1, data2) => data2 - data1;
@@ -2444,7 +2444,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an array, element-wise exponential of this.array</returns>
 		public static Array Exp(this Array array)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
@@ -2454,12 +2454,12 @@ namespace AspireApp.Libraries
 				for (var i = 0; i < oRcd.Length; i++)
 				{
 					//int[] index = array.GetIndices(i);
-					double dData = (double)Convert.ChangeType(array.GetValue(index), typeof(double));
+					double dData = (double)Convert.ChangeType(array.GetValue(index), typeof(double))!;
 					oRcd.SetValue(Math.Exp(dData), index);
 					index = index.Increament(dims);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2475,7 +2475,7 @@ namespace AspireApp.Libraries
 		/// <param name="amount">Amount is added to all elements in this.array</param>
 		/// <param name="mask">An array with bool element, its dimensions must be same as array. if one element is true, the element in array does not participate in calculations. This is for masked array calculation to support what <c>Numpy.ma</c> is doing</param>
 		/// <returns>Returns the absolute value</returns>
-		public static Array Abs(this Array array, double amount, Array mask = null)
+		public static Array Abs(this Array array, double amount, Array? mask = null)
 		{
 			Func<double, double, double> func = (data1, amount) => Math.Abs(data1 + amount);
 			return ByElement(array, amount, func, mask);
@@ -2494,7 +2494,7 @@ namespace AspireApp.Libraries
 		/// <returns>a bool array</returns>
 		public static Array IsNaN(this Array array)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) &&
 				(array.Length > 0))
 			{
@@ -2506,7 +2506,7 @@ namespace AspireApp.Libraries
 					oRcd.SetValue(i, double.IsNaN(data));
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2522,7 +2522,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns a 2-D array with 1's on the diagonal</returns>
 		public static T[,] Eye<T>(int N)
 		{
-			T[,] oRcd = null;
+			T[,]? oRcd = null;
 			if (N > 0)
 			{
 				oRcd = new T[N, N];
@@ -2541,7 +2541,7 @@ namespace AspireApp.Libraries
 					//}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2556,7 +2556,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an int[] containing the length of each dimensions, or null</returns>
 		public static int[] GetDimensions(this Array array)
 		{
-			int[] oRcd = null;
+			int[]? oRcd = null;
 			if (array != null)
 			{
 				oRcd = new int[array.Rank];
@@ -2565,7 +2565,7 @@ namespace AspireApp.Libraries
 					oRcd[i] = array.GetLength(i);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2582,14 +2582,14 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static Array Triu(this Array array, int k = 0)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) &&
 				(array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
 				//object data = array.GetAt(0);
 				//copy data
-				oRcd = Array.CreateInstance(array.GetType().GetElementType(), dims);
+				oRcd = Array.CreateInstance(array.GetType().GetElementType()!, dims);
 				Buffer.BlockCopy(array, 0, (Array)oRcd, 0, Buffer.ByteLength(array));
 				//clear some element
 				int[] index = new int[dims.Length];
@@ -2613,7 +2613,7 @@ namespace AspireApp.Libraries
 					IncreamentIndex(index, rangs);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2669,14 +2669,14 @@ namespace AspireApp.Libraries
 					if (nNewCount == nCount)
 					{
 						//object data = array.GetAt(0);
-						oRcd = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+						oRcd = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 						Buffer.BlockCopy(array, 0, (Array)oRcd, 0, Buffer.ByteLength(array));
 
 						//memory sequence
 						if ((FortranMemorySequence) &&
 							(newDims.Length > 1))
 						{//change memory sequence to Fortran type
-							Array Temp = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+							Array Temp = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 							//int nLast2DLength = newDims[^1] * newDims[^2];
 							//for (int i=0;i<oRcd.Length;i++)
 							//{
@@ -2706,7 +2706,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2725,7 +2725,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns the dot product of arrayA and arrayB. If arrays are both 1-D arrays then a scalar is returned; otherwise an array is returned.</returns>
 		public static object Dot(this Array arrayA, Array arrayB)
 		{
-			object oRcd = null;
+			object? oRcd = null;
 			if ((arrayA != null) && (arrayB != null))
 			{
 				if ((arrayA.Rank == 1) && (arrayB.Rank == 1))
@@ -2743,7 +2743,7 @@ namespace AspireApp.Libraries
 					//oRcd = arrayA.Multip(arrayB);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2760,7 +2760,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns the array formed by stacking the given arrays, will be at least 3-D</returns>
 		public static Array Dstack(this Array array, Array b)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0) &&
 				(b != null) && (b.Length > 0))
 			{
@@ -2803,7 +2803,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -2924,14 +2924,14 @@ namespace AspireApp.Libraries
 		/// <returns>Returns the output array which has the same shape as this.array, except along the given axis</returns>
 		public static Array Repeat(this Array array, int nRepeat, int? nAxis = null)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0) && (nRepeat > 0))
 			{
 				int[] dims = array.GetDimensions();
 				//object oData = array.GetAt(0);
 				if (nAxis == null)
 				{//repeat each element nRepeat times, and return 1D array
-					oRcd = Array.CreateInstance(array.GetType().GetElementType(), new int[] { array.Length * nRepeat });
+					oRcd = Array.CreateInstance(array.GetType().GetElementType()!, new int[] { array.Length * nRepeat });
 					for (var i = 0; i < array.Length; i++)
 					{
 						object oData = array.GetAt(i);
@@ -2972,10 +2972,10 @@ namespace AspireApp.Libraries
 							OriginalLength = dims[i]   //must set this before use of it Nxxxx properties
 						};
 					}
-					oRcd = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+					oRcd = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
 					for (var i = 0; i < oRcd.Length; i++)
 					{
-						object oData = array.GetValue(thisIndex);
+						object oData = array.GetValue(thisIndex)!;
 						//copy current index
 						Array.Copy(thisIndex, 0, newIndex, 0, thisIndex.Length);
 						for (var j = 0; j < nRepeat; j++)
@@ -2987,7 +2987,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -3004,7 +3004,7 @@ namespace AspireApp.Libraries
 		/// <returns>A rotated view of this.array. If array is null or  its Rank less and equal than 1, return null</returns>
 		//public static Array Rot90(this Array array, int k = 1)
 		//{
-		//	Array oRcd = null;
+		//	Array? oRcd = null;
 		//	if ((array != null) && (array.Rank > 1))
 		//	{
 		//		//normalize k
@@ -3013,7 +3013,7 @@ namespace AspireApp.Libraries
 		//		//var thisData = array.GetAt(0);
 		//		if (nK == 0)
 		//		{//no change, return its copy
-		//			oRcd = Array.CreateInstance(array.GetType().GetElementType(), thisDims);
+		//			oRcd = Array.CreateInstance(array.GetType().GetElementType()!, thisDims);
 		//			int bytes = Buffer.ByteLength(oRcd);
 		//			Buffer.BlockCopy(array, 0, oRcd, 0, bytes);
 		//		}
@@ -3033,7 +3033,7 @@ namespace AspireApp.Libraries
 		//				dstDims[1] = nTemp;
 		//			}
 		//			//new array
-		//			oRcd = Array.CreateInstance(array.GetType().GetElementType(), dstDims);
+		//			oRcd = Array.CreateInstance(array.GetType().GetElementType()!, dstDims);
 		//			//get memory handle of each array, and lock those memroy from garbage collection(prevents the garbage collector from moving the object and hence undermines the efficiency of the garbage collector)
 		//			GCHandle gchArray = GCHandle.Alloc(array, GCHandleType.Pinned);
 		//			GCHandle gchNew = GCHandle.Alloc(oRcd, GCHandleType.Pinned);
@@ -3080,7 +3080,7 @@ namespace AspireApp.Libraries
 		//		}
 		//	}
 
-		//	return oRcd;
+		//	return oRcd!;
 		//}
 		/// <summary>
 		/// Rotate an array by 90 degrees. Rotation direction is from the first towards the second axis. This means for a 2D array with the default k and axes, the rotation will be counterclockwise.
@@ -3096,9 +3096,9 @@ namespace AspireApp.Libraries
 		/// <param name="k">Number of times the array is rotated by 90 degrees ()</param>
 		/// <param name="axes">The array is rotated in the plane defined by the axes. Default is null that means (0,1). this must be a 2 elements array. and all value must be &gt;=0 &amp; &lt; array.Rank</param>
 		/// <returns>A rotated view of this.array. If array is null or  its Rank less and equal than 1, return null</returns>
-		public static Array Rot90(this Array array, int k = 1, int[] axes = null)
+		public static Array Rot90(this Array array, int k = 1, int[]? axes = null)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Rank > 1))
 			{	//array must be at least 2 Rank
 				if(axes == null)
@@ -3117,7 +3117,7 @@ namespace AspireApp.Libraries
 						int[] thisDims = array.GetDimensions();
 						if (nK == 0)
 						{   //no change, return its copy
-							oRcd = Array.CreateInstance(array.GetType().GetElementType(), thisDims);
+							oRcd = Array.CreateInstance(array.GetType().GetElementType()!, thisDims);
 							int bytes = Buffer.ByteLength(oRcd);
 							Buffer.BlockCopy(array, 0, oRcd, 0, bytes);
 						}
@@ -3145,7 +3145,7 @@ namespace AspireApp.Libraries
 								dstDims[axes[1]] = nTemp;
 							}
 							//new array
-							oRcd = Array.CreateInstance(array.GetType().GetElementType(), dstDims);
+							oRcd = Array.CreateInstance(array.GetType().GetElementType()!, dstDims);
 							//get memory handle of each array, and lock those memroy from garbage collection(prevents the garbage collector from moving the object and hence undermines the efficiency of the garbage collector)
 							GCHandle gchArray = GCHandle.Alloc(array, GCHandleType.Pinned);
 							GCHandle gchNew = GCHandle.Alloc(oRcd, GCHandleType.Pinned);
@@ -3290,7 +3290,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 		/// <summary>
 		/// a 1D array index of a multi dimeensional array
@@ -3329,11 +3329,11 @@ namespace AspireApp.Libraries
 		/// <returns>Returns the an output array that had the same type as this.array</returns>
 		public static object Take(this Array array, object indices, int? nAxis = null)
 		{
-			object oRcd = null;
+			object? oRcd = null;
 			if ((array != null) && (indices != null))
 			{
 				//object oData = array.GetAt(0);
-				Type oType = array.GetType().GetElementType();
+				Type oType = array.GetType().GetElementType()!;
 				if (nAxis == null)
 				{//indices are the serial number in array, that means if the array.Lenght is 100, the serial is 0,1,2,...99
 					if (indices is int)
@@ -3368,7 +3368,7 @@ namespace AspireApp.Libraries
 					int[] dims = array.GetDimensions();
 					if ((axis >= 0) && (axis < dims.Length))
 					{//have right axis number
-						int[] newDims = null;
+						int[]? newDims = null;
 						if (indices is int)
 						{// int index
 							newDims = new int[dims.Length - 1];
@@ -3453,7 +3453,7 @@ namespace AspireApp.Libraries
 							for (var j = 0; j < aIndices.Length; j++)
 							{
 								int[] aIndex = aIndices.GetIndices(j);
-								int nIndex = (int)aIndices.GetValue(aIndex);
+								int nIndex = (int)aIndices.GetValue(aIndex)!;
 								if ((nIndex < 0) || (nIndex >= dims[axis]))
 								{//bad index
 									oRcd = null;
@@ -3483,7 +3483,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -3502,7 +3502,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an output array, which the same shape as this.array</returns>
 		public static Array Roll(this Array array, int nShift, int nAxis)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] thisDims = array.GetDimensions();
@@ -3513,7 +3513,7 @@ namespace AspireApp.Libraries
 				if (nAxis < thisDims.Length)
 				{//correct Axis
 				 // make output array, total same dimesions
-					Type elementType = array.GetType().GetElementType();
+					Type elementType = array.GetType().GetElementType()!;
 					oRcd = Array.CreateInstance(elementType, thisDims);
 					GCHandle gchArray = GCHandle.Alloc(array, GCHandleType.Pinned);
 					GCHandle gchNew = GCHandle.Alloc(oRcd, GCHandleType.Pinned);
@@ -3569,7 +3569,7 @@ namespace AspireApp.Libraries
 					gchNew.Free();
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -3586,16 +3586,16 @@ namespace AspireApp.Libraries
 		/// <param name="nShift">The number of places by which elements are shifted</param>
 		/// <param name="Axis">Axes along which elements are shifted. Given 1 or more Axis, if this is a null, roll it as a 1D array</param>
 		/// <returns>Returns an output array, which the same shape as this.array</returns>
-		public static Array Roll(this Array array, int nShift, int[] Axis = null)
+		public static Array Roll(this Array array, int nShift, int[]? Axis = null)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				if (Axis == null)
 				{
 					int[] thisDims = array.GetDimensions();
 					// make output array, total same dimesions
-					Type elementType = array.GetType().GetElementType();
+					Type elementType = array.GetType().GetElementType()!;
 					oRcd = Array.CreateInstance(elementType, thisDims);
 					GCHandle gchArray = GCHandle.Alloc(array, GCHandleType.Pinned);
 					GCHandle gchNew = GCHandle.Alloc(oRcd, GCHandleType.Pinned);
@@ -3652,7 +3652,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -3667,7 +3667,7 @@ namespace AspireApp.Libraries
 			string strRcd = string.Empty;
 			if ((array != null) && (array.Length > 0))
 			{
-				Type elementType = array.GetType().GetElementType();
+				Type elementType = array.GetType().GetElementType()!;
 				if (elementType != typeof(decimal))
 				{//do not support Decimal
 				 //copy all byte to a byte array
@@ -3758,7 +3758,7 @@ namespace AspireApp.Libraries
 		public static Array ODMBDecode(this byte[] array, int nViews, bool bDropFirstFrame = false, int nCaptures = 1, int nCounters = 13, bool bAccum = false, int nRowPerAsic = 24, int nColumnPerAsic = 36, int nMiniModules = 8, int nAsicsPerMM = 2)
 		{
             // view_dtype.itemsize: = 89856 ... data = data[view_dtype.itemsize:]
-            Array oRcd = null;
+            Array? oRcd = null;
 			if ((nCaptures > 0) &&
 				(nViews > 0) &&
 				(nCounters > 0))
@@ -3813,7 +3813,7 @@ namespace AspireApp.Libraries
 					oRcd = (Array)oRcd.Flip(-1);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -3884,7 +3884,7 @@ namespace AspireApp.Libraries
 		/// <returns>A multi dimensional array for DM Buffer capture data. Dimensions are [nCaptures(if have), nViews, nRow, nColumn, nCounters]</returns>
 		public static Array DMBufferDecode(this byte[] array, int nViews, int nCaptures = 1, int nCounters = 13, bool bAccum = false)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((nCaptures > 0) &&
 				(nViews > 0) &&
 				(nCounters > 0))
@@ -3977,7 +3977,7 @@ namespace AspireApp.Libraries
 					oRcd = (Array)oRcd.Flip(-1);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 		
 		#endregion
@@ -3990,7 +3990,7 @@ namespace AspireApp.Libraries
 		/// <returns>a DynamicDictionary contains all contents of Die_ID, null : when the array is not correct</returns>
 		public static dynamic ParseDieID(this ushort[] array)
 		{
-			dynamic oRcd = null;
+			dynamic? oRcd = null;
 			if ((array != null) && (array.Length >= 8))
 			{
 				//make a Little endian order byte[16]
@@ -4008,7 +4008,7 @@ namespace AspireApp.Libraries
 				}
 				oRcd = bArray.ParseDieID(false);
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
         /// <summary>
@@ -4038,7 +4038,7 @@ namespace AspireApp.Libraries
 		/// </example>
 		public static dynamic ParseDieID(this byte[] data, bool isBigEndian = true)
 		{
-            DynamicDictionary oRcd = null;
+            DynamicDictionary? oRcd = null;
 			if ((data != null) && (data.Length >= 16))
 			{
                 oRcd = new DynamicDictionary();
@@ -4076,7 +4076,7 @@ namespace AspireApp.Libraries
                 DieID128bit >>= 2;
                 oRcd.Set("Reserved3", (ulong)DieID128bit);
             }
-            return oRcd;
+            return oRcd!;
 		}
 
 		/// <summary>
@@ -4229,7 +4229,7 @@ namespace AspireApp.Libraries
 		/// <returns>Indice after increament. null if wrong argument</returns>
 		public static int[] Increament(this int[] Indices, int[] dims, bool bMemorySequence = true)
 		{
-			int[] oRcd = null;
+			int[]? oRcd = null;
 			if ((dims != null) &&
 				(Indices != null) &&
 				(dims.Length > 0) &&
@@ -4250,7 +4250,7 @@ namespace AspireApp.Libraries
 				}
 				oRcd = Indices;
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -4316,7 +4316,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an output array of the mapping of indices</returns>
 		public static int[] IndicesMapping(int[] srcIndices, int[] dims)
 		{
-			int[] oRcd = null;
+			int[]? oRcd = null;
 			if ((srcIndices != null) && (dims != null))
 			{
 				oRcd = new int[dims.Length];
@@ -4331,7 +4331,7 @@ namespace AspireApp.Libraries
 					nsrcDims--;
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -4344,7 +4344,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an object</returns>
 		public static object NanByAxis(Array array, int[] axises, Func<double[], double> func, bool bIgnorNan = false)
 		{
-            object oRcd = null;
+            object? oRcd = null;
             if ((array != null) &&
                 (array.Length > 1))
             {
@@ -4450,7 +4450,7 @@ namespace AspireApp.Libraries
                     }
                 }
             }
-            return oRcd;
+            return oRcd!;
         }
 
 		/// <summary>
@@ -4480,9 +4480,9 @@ namespace AspireApp.Libraries
 		/// <param name="maskArray">An array with bool element, its dimensions must be same as array. if one element is true, the element in array does not participate in calculations. This is for masked array calculation to support what <c>Numpy.ma</c> is doing</param>
 		/// <param name="maskData">An array with bool element, its dimensions must be same as data if data is an array. if one element is true, the element in data does not participate in calculations. This is for masked array calculation to support what <c>Numpy.ma</c> is doing</param>
 		/// <returns>Returns output array with the calculations done by element</returns>
-		public static Array ByElement(Array array, object data, Func<double, double, double> func, Array maskArray = null, Array maskData = null)
+		public static Array ByElement(Array array, object data, Func<double, double, double> func, Array? maskArray = null, Array? maskData = null)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			//an fuction to get a element mask
 			bool GetMask(Array mask, int[] Index)
 			{
@@ -4491,7 +4491,7 @@ namespace AspireApp.Libraries
 				{
 					try
 					{
-						bRcd = (bool)mask.GetValue(Index);
+						bRcd = (bool)mask.GetValue(Index)!;
 					}
 					catch (Exception ex)
 					{//do nothing, just return a false
@@ -4515,7 +4515,7 @@ namespace AspireApp.Libraries
 							((maskData != null) && (maskData.GetDimensions().SequenceEqual(srcDims))))  //maskData's dimensions must be same as data's dimensions
 						{
 							//create target dimesion
-							int[] resultDims = null;
+							int[]? resultDims = null;
 							if (srcDims.Length >= dims.Length)
 							{
 								//use src's dimension
@@ -4567,7 +4567,7 @@ namespace AspireApp.Libraries
 								var thisIndex = IndicesMapping(resultIndex, dims);
 								var dataIndex = IndicesMapping(resultIndex, srcDims);
 								double result = double.NaN; //if masked set result as NaN
-								if (!GetMask(maskArray, thisIndex) && !GetMask(maskData, dataIndex))
+								if (!GetMask(maskArray!, thisIndex) && !GetMask(maskData!, dataIndex))
 								{
 									double temp1 = Convert.ToDouble(array.GetValue(thisIndex));
 									double temp2 = Convert.ToDouble(src.GetValue(dataIndex));
@@ -4586,7 +4586,7 @@ namespace AspireApp.Libraries
 						for (var i = 0; i < array.Length; i++)
 						{
 							double result = double.NaN; //if masked set result as NaN
-							if (!GetMask(maskArray, index))
+							if (!GetMask(maskArray!, index))
 							{
 								double temp1 = Convert.ToDouble(array.GetValue(index));
 								result = func(temp1, dData);
@@ -4598,7 +4598,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -4611,7 +4611,7 @@ namespace AspireApp.Libraries
 		/// <returns>Value(Values) or Index(Indices)</returns>
 		public static object CheckedByAxis(this Array array, int? nAxis, Func<object, object, bool> func, bool bValue = true)
 		{
-			object oRcd = null;
+			object? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
@@ -4662,7 +4662,7 @@ namespace AspireApp.Libraries
 						};
 						nIndex++;
 					}
-					Array oTemp = Array.CreateInstance(bValue ? array.GetType().GetElementType() : typeof(int), newDims);
+					Array oTemp = Array.CreateInstance(bValue ? array.GetType().GetElementType()! : typeof(int), newDims);
 					Array.Clear(oTemp, 0, oTemp.Length);
 					oRcd = oTemp;
 					for (var i = 0; i < oTemp.Length; i++)
@@ -4680,13 +4680,13 @@ namespace AspireApp.Libraries
 							nIndex++;
 						}
 						//first data
-						object temp1 = array.GetValue(thisIndex);
+						object temp1 = array.GetValue(thisIndex)!;
 						object oData = bValue ? temp1 : 0;
 						//find max
 						for (var j = 1; j < dims[nTemp]; j++)
 						{
 							thisIndex[nTemp] = j;
-							object temp2 = array.GetValue(thisIndex);
+							object temp2 = array.GetValue(thisIndex)!;
 							if (func(temp1, temp2))
 							{
 								temp1 = temp2;
@@ -4699,7 +4699,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 
@@ -4913,7 +4913,7 @@ namespace AspireApp.Libraries
 			{
 				for (int k = 0; k < array.GetLength(0); k++)
 				{
-					var temp = (Array)array.PartOf(new SliceIndex[] { new SliceIndex(k), null, null });
+					var temp = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }!);
 					result.SetValue(temp.IsGreaterThan(condition[k], false), new int?[] { k, null, null });
 				}
 			}
@@ -4961,7 +4961,7 @@ namespace AspireApp.Libraries
 				//for (int k = 0; k < array.GetLength(0); k++)
 				Parallel.For(0, array.GetLength(0), k =>
 				{
-					var temp = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null });
+					var temp = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }!);
 					result.SetValue(temp.Boolean_IsGreaterThan(condition[k]), new int?[] { k, null, null });
 				});
 			}
@@ -4987,7 +4987,7 @@ namespace AspireApp.Libraries
 		/// <param name="array1">First input array</param>
 		/// <param name="array2">Second input array</param>
 		/// <returns>Returns a bool array whose value is true if either the value in array1 or array2 are true, else false</returns>
-		public static Array ComparingBoolArrays(Array array1, Array array2)
+		public static Array? ComparingBoolArrays(Array array1, Array array2)
 		{
 			if (array1.GetDimensions().Length == array2.GetDimensions().Length)
 			{
@@ -5011,7 +5011,7 @@ namespace AspireApp.Libraries
 		/// <param name="array">this.array, input array</param>
 		/// <param name="valueToFind">A function that returns a bool if a value matches the element in the indices</param>
 		/// <returns>Returns a bool array that determines if a specified value exists in each indice</returns>
-		public static Array Any(this Array array, Func<double, bool> valueToFind)
+		public static Array? Any(this Array array, Func<double, bool> valueToFind)
 		{
 			switch (array.GetDimensions().Length)
 			{
@@ -5071,7 +5071,7 @@ namespace AspireApp.Libraries
 		///// <returns>Returns an array with elements of type Double</returns>
 		//public static Array ConvertToDouble(this Array array)
 		//{
-		//	Array result = null;
+		//	Array? result = null;
 		//	var dims = array.GetDimensions();
 
 		//	if (dims.Length > 0)
@@ -5183,7 +5183,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an array with a dimension inserted into it</returns>
 		public static Array AddDimension(this Array array, bool toRight = false)
 		{
-			Array result = null;
+			Array? result = null;
 			switch (array.GetDimensions().Length)
 			{
 				case 2:
@@ -5230,7 +5230,7 @@ namespace AspireApp.Libraries
 						break;
 					}
 			}
-			return result;
+			return result!;
 		}
 
 		/// <summary>
@@ -5241,7 +5241,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an array with a dimension inserted into it</returns>
 		public static Array AddDimension<T>(this Array array, bool toRight = false)
 		{
-			Array result = null;
+			Array? result = null;
 			switch (array.GetDimensions().Length)
 			{
 				case 1:
@@ -5308,7 +5308,7 @@ namespace AspireApp.Libraries
 						break;
 					}
 			}
-			return result;
+			return result!;
 		}
 
 		/// <summary>
@@ -5383,7 +5383,7 @@ namespace AspireApp.Libraries
 
 			if (dims[num_dims - 2] == rows && dims[num_dims - 1] == cols && num_dims == 4)
 			{
-				var temp = (Array)array.PartOf(new object[] { null, null, new SliceIndex(1, null, 2), new SliceIndex(null, null, -1) });
+				var temp = (Array)array.PartOf(new object?[] { null, null, new SliceIndex(1, null, 2), new SliceIndex(null, null, -1) }!);
 
 				for (int k = 0; k < temp.GetLength(2); k++)
 					result.SetValue2(temp, new int?[] { null, null, (k * 2) + 1, null });
@@ -5402,13 +5402,13 @@ namespace AspireApp.Libraries
 		/// <returns>a array after sanke. null: when the orignal array is null or its rank is less than 2</returns>
 		public static Array Snake(this Array array, bool bTo1D = false)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Rank >= 2))
 			{
 				//this array's dimesion
 				int[] dims = array.GetDimensions();
 				//create output array
-				Type oType = array.GetType().GetElementType();
+				Type oType = array.GetType().GetElementType()!;
 				oRcd = Array.CreateInstance(oType, dims);
 				//init a slice
 				int?[] sliceIndices = new int?[dims.Length];
@@ -5439,7 +5439,7 @@ namespace AspireApp.Libraries
 					oRcd = oRcd.To1D();
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -5452,7 +5452,7 @@ namespace AspireApp.Libraries
 		/// <returns>Rectangular array with dimensions (..., N_ROWS, N_COLUMNS)</returns>
 		public static Array Desnake(this Array array, int length, int rows, int cols)
 		{
-			Array result = null;
+			Array? result = null;
 
 			if (array.GetLength(1) == length)
 			{
@@ -5460,7 +5460,7 @@ namespace AspireApp.Libraries
 				var temp = (Array)vector.PartOf(new object[] { new SliceIndex(1, null, 2), new SliceIndex(null, null, -1) });
 			}
 
-			return result;
+			return result!;
 		}
 
 		/// <summary>
@@ -5504,7 +5504,7 @@ namespace AspireApp.Libraries
 		/// </summary>
 		/// <param name="array">this.array</param>
 		/// <returns>Returns an array that has been reshaped to a 2D array</returns>
-		public static Array ReshapeTo2D(this Array array)
+		public static Array? ReshapeTo2D(this Array array)
 		{
 			if (array.GetDimensions().Length == 1)
 			{
@@ -5531,7 +5531,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static Array SumBins(this Array array, int nAxis = 1)
 		{
-			Array result = null;
+			Array? result = null;
 
 			if (array != null)
 			{
@@ -5551,7 +5551,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return result;
+			return result!;
 		}
 
 		/// <summary>
@@ -5566,7 +5566,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static Array Correlate1D(this Array array, double[] weights, int nAxis = -1, double cval = 0)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (weights != null))
 			{
 				//determine symetric of weitghts
@@ -5636,7 +5636,7 @@ namespace AspireApp.Libraries
 					Indices = Indices.Increament(dims);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		#endregion More auxiliary functions
@@ -5719,7 +5719,7 @@ namespace AspireApp.Libraries
 		/// <returns>Indice after increament. null if wrong argument</returns>
 		public static int[] Increment(this int[] Indices, int[] dims, bool bMemorySequence = true)
 		{
-			int[] oRcd = null;
+			int[]? oRcd = null;
 			if ((dims != null) &&
 				(Indices != null) &&
 				(dims.Length > 0) &&
@@ -5741,7 +5741,7 @@ namespace AspireApp.Libraries
 				}
 				oRcd = Indices;
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -5769,9 +5769,9 @@ namespace AspireApp.Libraries
 		/// <param name="data">A second array or a scalar</param>
 		/// <param name="func">A fuction to do calculation between two arrays</param>
 		/// <returns>Returns output array with the calculations done by element</returns>
-		public static Array ByElement(Array array, object data, Func<double, double, double> func)
+		public static Array ByElement(Array array, object? data, Func<double, double, double> func)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
@@ -5781,7 +5781,7 @@ namespace AspireApp.Libraries
 				{
 					int[] srcDims = src.GetDimensions();
 					//create target dimesion
-					int[] resultDims = null;
+					int[]? resultDims = null;
 					if (srcDims.Length >= dims.Length)
 					{
 						//use src's dimension
@@ -5856,13 +5856,13 @@ namespace AspireApp.Libraries
 
 					for (var i = 0; i < array.Length; i++)
 					{
-						double result = func((double)array.GetValue(index), value);
+						double result = func((double)array.GetValue(index)!, value);
 						oRcd.SetValue(result, index);
 						IncrementIndex(index, rangs);
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -5874,7 +5874,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns an output array with the calculations done by element</returns>
 		public static Array ByElement(double data, Array array, Func<double, double, double> func)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
@@ -5895,13 +5895,13 @@ namespace AspireApp.Libraries
 				{
 					for (var i = 0; i < array.Length; i++)
 					{
-						double result = func(data, (double)array.GetValue(index));
+						double result = func(data, (double)array.GetValue(index)!);
 						oRcd.SetValue(result, index);
 						IncrementIndex(index, rangs);
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -5931,7 +5931,7 @@ namespace AspireApp.Libraries
 		/// <returns>Returns output array with the calculations done by element</returns>
 		public static Array ByElement(Array array, object data, Func<double, double, bool> func)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
@@ -5941,7 +5941,7 @@ namespace AspireApp.Libraries
 				{
 					int[] srcDims = src.GetDimensions();
 					//create target dimesion
-					int[] resultDims = null;
+					int[]? resultDims = null;
 					if (srcDims.Length >= dims.Length)
 					{
 						//use src's dimension
@@ -6011,17 +6011,17 @@ namespace AspireApp.Libraries
 						};
 					}
 					oRcd = Array.CreateInstance(typeof(bool), dims);
-					var value = (double)data;
+					var value = (double)data!;
 
 					for (var i = 0; i < array.Length; i++)
 					{
-						var result = func((double)array.GetValue(index), value);
+						var result = func((double)array.GetValue(index)!, value);
 						oRcd.SetValue(result, index);
 						IncrementIndex(index, rangs);
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6032,7 +6032,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static Array ByElement(Array array, Func<double, double> func)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
@@ -6054,12 +6054,12 @@ namespace AspireApp.Libraries
 				oRcd = Array.CreateInstance(typeof(double), dims);
 				for (var i = 0; i < array.Length; i++)
 				{
-					double result = func((double)array.GetValue(index));
+					double result = func((double)array.GetValue(index)!);
 					oRcd.SetValue(result, index);
 					IncrementIndex(index, rangs);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6071,7 +6071,7 @@ namespace AspireApp.Libraries
 		/// <returns> result array </returns>
 		public static Array ByElement(Array array, Array data, Func<double, double, bool> func)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
@@ -6081,7 +6081,7 @@ namespace AspireApp.Libraries
 				{
 					int[] srcDims = src.GetDimensions();
 					//create target dimesion
-					int[] resultDims = null;
+					int[]? resultDims = null;
 					if (srcDims.Length >= dims.Length)
 					{
 						//use src's dimension
@@ -6138,7 +6138,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6150,7 +6150,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static Array ByElement(Array array, Array data, Func<bool, bool, bool> func)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if ((array != null) && (array.Length > 0))
 			{
 				int[] dims = array.GetDimensions();
@@ -6160,7 +6160,7 @@ namespace AspireApp.Libraries
 				{
 					int[] srcDims = src.GetDimensions();
 					//create target dimesion
-					int[] resultDims = null;
+					int[]? resultDims = null;
 					if (srcDims.Length >= dims.Length)
 					{
 						//use src's dimension
@@ -6217,7 +6217,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6256,7 +6256,7 @@ namespace AspireApp.Libraries
 					for (int j = 0; j < dims[^1]; j++)
 					{
 						Indices[^1] = j;
-						strTemp.Append(array.GetValue(Indices).ToString());
+						strTemp.Append(array.GetValue(Indices)!.ToString());
 						if (j < dims[^1] - 1)
 						{
 							strTemp.Append(',');
@@ -6324,10 +6324,10 @@ namespace AspireApp.Libraries
 		public static byte[] Serialize(this Array array)
 		{
 			Debug.Assert(BitConverter.IsLittleEndian, "Your system is big endian system, Currently Array Deserialize(this byte[] array) only supports Little Endian system,");
-			byte[] btRcd = null;
+			byte[]? btRcd = null;
 			if (array != null)
 			{
-				Type oType = array.GetType().GetElementType();
+				Type oType = array.GetType().GetElementType()!;
 				if (oType.IsValueType)
 				{
 					try
@@ -6335,7 +6335,7 @@ namespace AspireApp.Libraries
 						using (MemoryStream ms = new MemoryStream(409600000))
 						{
 							//convert type name to UTF8
-							byte[] typeName = Encoding.UTF8.GetBytes(oType.FullName);
+							byte[] typeName = Encoding.UTF8.GetBytes(oType.FullName!);
 							// length of type name in byte (1 byte)
 							ms.WriteByte((byte)typeName.Length);
 							//type name in UTF8
@@ -6362,7 +6362,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return btRcd;
+			return btRcd!;
 		}
 
 		/// <summary>
@@ -6373,7 +6373,7 @@ namespace AspireApp.Libraries
 		public static Array Deserialize(this byte[] array)
 		{
 			Debug.Assert(BitConverter.IsLittleEndian, "Your system is big endian system, Currently Array Deserialize(this byte[] array) only supports Little Endian system,");
-			Array oRcd = null;
+			Array? oRcd = null;
 			if (array != null)
 			{
 				try
@@ -6387,7 +6387,7 @@ namespace AspireApp.Libraries
 						byte[] typeName = new byte[nTypeName];
 						ms.Read(typeName, 0, typeName.Length);
 						string strTypeName = Encoding.UTF8.GetString(typeName);
-						Type oType = Type.GetType(strTypeName);
+						Type oType = Type.GetType(strTypeName)!;
 						//dimention count
 						byte dimsLength = (byte)ms.ReadByte();
 						//dimensions
@@ -6428,7 +6428,7 @@ namespace AspireApp.Libraries
 					oRcd = null;
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6438,7 +6438,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static byte[] CompressBytes(this byte[] data)
 		{
-			byte[] oRcd = null;
+			byte[]? oRcd = null;
 			try
 			{
 				using (var inputStream = new MemoryStream(data))
@@ -6464,7 +6464,7 @@ namespace AspireApp.Libraries
 			catch (Exception /*e*/)
 			{
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6474,7 +6474,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static byte[] DecompressBytes(this byte[] data)
 		{
-			byte[] oRcd = null;
+			byte[]? oRcd = null;
 			try
 			{
 				using (MemoryStream inputStream = new MemoryStream(data))
@@ -6502,7 +6502,7 @@ namespace AspireApp.Libraries
 			catch (Exception /*e*/)
 			{
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6542,7 +6542,7 @@ namespace AspireApp.Libraries
 		/// <returns>a bool array which dimesion is same as this arry, and its elements are all bool.</returns>
 		public static Array MakeMask(this Array array, Func<double, bool> conditions)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if (array != null)
 			{
 				int[] dims = array.GetDimensions();
@@ -6553,7 +6553,7 @@ namespace AspireApp.Libraries
 					Array.Clear(indices, 0, dims.Length);
 					for (int i = 0; i < array.Length; i++)
 					{
-						double dTemp = (double)array.GetValue(indices);
+						double dTemp = (double)array.GetValue(indices)!;
 						bool bTemp = conditions(dTemp);
 						oRcd.SetValue(bTemp, indices);
 						indices = indices.Increament(dims);
@@ -6565,7 +6565,7 @@ namespace AspireApp.Libraries
 					oRcd.SetValue2(false);
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6596,7 +6596,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static Array Where(this Array array, Func<double, bool> conditions, Func<double, double> x, Func<double, double> y)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if (array != null)
 			{
 				oRcd = array.Copy<double>();
@@ -6607,7 +6607,7 @@ namespace AspireApp.Libraries
 					Array.Clear(indices, 0, dims.Length);
 					for (int i = 0; i < array.Length; i++)
 					{
-						double dTemp = (double)oRcd.GetValue(indices);
+						double dTemp = (double)oRcd.GetValue(indices)!;
 						bool bTemp = conditions(dTemp);
 						if (bTemp)
 						{
@@ -6622,7 +6622,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6671,7 +6671,7 @@ namespace AspireApp.Libraries
 		/// <returns>A double array, if a correspinding element is masked (= conditions function return true), the element will be set as NaN</returns>
 		public static Array MakeMaskedDoubleArrayWithNaN(this Array array, Func<double, bool> conditions)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if (array != null)
 			{
 				//copy it to an array with double elements
@@ -6683,7 +6683,7 @@ namespace AspireApp.Libraries
 					Array.Clear(indices, 0, dims.Length);
 					for (int i = 0; i < array.Length; i++)
 					{
-						double dTemp = (double)oRcd.GetValue(indices);
+						double dTemp = (double)oRcd.GetValue(indices)!;
 						bool bTemp = conditions(dTemp);
 						if (bTemp)
 						{//if it is true, set NaN for this element
@@ -6693,7 +6693,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6743,7 +6743,7 @@ namespace AspireApp.Libraries
 		/// <returns>A double array, if a correspinding element is masked (= conditions function return true), the element will be set as NaN</returns>
 		public static Array MakeMaskedDoubleArrayWithNaN(this Array array, Array target, Func<double, double, bool> conditions)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if (array != null)
 			{
 				//copy it to an array with double elements
@@ -6759,8 +6759,8 @@ namespace AspireApp.Libraries
 						Array.Clear(indices, 0, dims.Length);
 						for (int i = 0; i < array.Length; i++)
 						{
-							double dTemp1 = (double)oRcd.GetValue(indices);
-							double dTemp2 = (double)target.GetValue(indices);
+							double dTemp1 = (double)oRcd.GetValue(indices)!;
+							double dTemp2 = (double)target.GetValue(indices)!;
 							bool bTemp = conditions(dTemp1, dTemp2);
 							if (bTemp)
 							{//if it is true, set NaN for this element
@@ -6771,7 +6771,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6819,11 +6819,11 @@ namespace AspireApp.Libraries
 		/// <returns>a clipped double array</returns>
 		public static Array Clip(this Array array, object minimum, object maximum)
 		{
-			Array oRcd = null;
+			Array? oRcd = null;
 			if (array != null)
 			{
 				int[] dims = array.GetDimensions();
-				Array aMinimum = null;
+				Array? aMinimum = null;
 				double dMinimum = 0;
 				bool bSame = true;
 				if (minimum != null)
@@ -6831,7 +6831,7 @@ namespace AspireApp.Libraries
 					if (minimum is Array)
 					{
 						aMinimum = minimum as Array;
-						int[] minmumDims = aMinimum.GetDimensions();
+						int[] minmumDims = aMinimum!.GetDimensions();
 						if ((minmumDims.Length != dims.Length) ||
 							(!dims.SequenceEqual(minmumDims)))
 						{
@@ -6845,14 +6845,14 @@ namespace AspireApp.Libraries
 				}
 				if (bSame)
 				{
-					Array aMaximum = null;
+					Array? aMaximum = null;
 					double dMaximum = 0;
 					if (maximum != null)
 					{
 						if (maximum is Array)
 						{
 							aMaximum = maximum as Array;
-							int[] maxmumDims = aMaximum.GetDimensions();
+							int[] maxmumDims = aMaximum!.GetDimensions();
 							if ((maxmumDims.Length != dims.Length) ||
 								(!dims.SequenceEqual(maxmumDims)))
 							{
@@ -6874,10 +6874,10 @@ namespace AspireApp.Libraries
 							Array.Clear(indices, 0, dims.Length);
 							for (int i = 0; i < array.Length; i++)
 							{
-								double dValue = (double)oRcd.GetValue(indices);
+								double dValue = (double)oRcd.GetValue(indices)!;
 								if (minimum != null)
 								{
-									double dMin = aMinimum == null ? dMinimum : (double)Convert.ChangeType(aMinimum.GetValue(indices), typeof(double));
+									double dMin = aMinimum == null ? dMinimum : (double)Convert.ChangeType(aMinimum.GetValue(indices)!, typeof(double));
 									if (dValue < dMin)
 									{
 										dValue = dMin;
@@ -6885,7 +6885,7 @@ namespace AspireApp.Libraries
 								}
 								if (maximum != null)
 								{
-									double dMax = aMaximum == null ? dMaximum : (double)Convert.ChangeType(aMaximum.GetValue(indices), typeof(double));
+									double dMax = aMaximum == null ? dMaximum : (double)Convert.ChangeType(aMaximum.GetValue(indices)!, typeof(double));
 									if (dValue > dMax)
 									{
 										dValue = dMax;
@@ -6899,7 +6899,7 @@ namespace AspireApp.Libraries
 
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -6931,7 +6931,7 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static double[] Interp<T>(this T[] array, double[] xp, double[] fp) where T : struct
 		{
-			double[] oRcd = null;
+			double[]? oRcd = null;
 			if ((array != null) &&
 				(xp != null) &&   //must be increasing, but do not check it here
 				(fp != null) &&
@@ -6992,7 +6992,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return oRcd;
+			return oRcd!;
 		}
 
 		/// <summary>
@@ -7021,7 +7021,7 @@ namespace AspireApp.Libraries
 		/// <param name="threshStep"></param>
 		/// <param name="numThresh"></param>
 		/// <returns></returns>
-		public static Array GetBinThreshList(int numBins, int threshStart, int threshEnd, int threshStep, int numThresh)
+		public static Array? GetBinThreshList(int numBins, int threshStart, int threshEnd, int threshStep, int numThresh)
 		{
 			if (numBins > 0)
 			{
@@ -7228,7 +7228,7 @@ namespace AspireApp.Libraries
 			var result = new double[p0.Length];
 			var x = (double[,])((Array)xdata).AddDimension<double>(true);
 			var y = new double[xdata.Length];
-			int info;
+			// int info;
 			alglib.lsfitstate state;
 			alglib.lsfitreport rep;
 
@@ -7262,7 +7262,7 @@ namespace AspireApp.Libraries
 		/// <param name="p0"></param>
 		public static double[] CurveFit(enmMathFunction functionName, double[] xdata, double[] ydata, double[] p0)
 		{
-			double[] result = null;
+			double[]? result = null;
 			bool bounded_problem = false;
 
 			foreach (var elem in p0)
@@ -7316,11 +7316,11 @@ namespace AspireApp.Libraries
 		/// <returns></returns>
 		public static Array Visible(this Array array, Array bolArray)
 		{
-			Array result = null;
+			Array? result = null;
 
 			if (array.GetLength(0) == bolArray.GetLength(0) && array.GetLength(1) == bolArray.GetLength(1) && array.GetDimensions().Length == 3)
 			{
-				result = Array.CreateInstance(array.GetType().GetElementType(), new int[] { bolArray.CountByValue<bool>(true), array.GetLength(2) });
+				result = Array.CreateInstance(array.GetType().GetElementType()!, new int[] { bolArray.CountByValue<bool>(true), array.GetLength(2) });
 				var bolMatrix = (bool[,])bolArray;
 				int index = 0;
 
@@ -7330,7 +7330,7 @@ namespace AspireApp.Libraries
 					{
 						if (bolMatrix[j, i])
 						{
-							var temp = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(j), new SliceIndex(i), null });
+							var temp = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(j), new SliceIndex(i), null }!);
 							result.SetValue(temp, new int?[] { index, null });
 							index++;
 						}
@@ -7338,7 +7338,7 @@ namespace AspireApp.Libraries
 				}
 			}
 
-			return result;
+			return result!;
 		}
 
 		/// <summary>
@@ -7354,7 +7354,7 @@ namespace AspireApp.Libraries
 
 			for (int k = numBins - 1; k >= 0; k--)
 			{
-				var temp = (Array)array.PartOf(new SliceIndex[] { new SliceIndex(k), null, null });
+				var temp = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }!);
 				acum = acum.Sum(temp);
 				result.SetValue(acum, new int?[] { k, null, null });
 			}
@@ -7374,12 +7374,12 @@ namespace AspireApp.Libraries
 			var cc_window_all_means = Array.CreateInstance(typeof(double), numBins, data.GetLength(1));
 			var cc_window_max_mean = new double[numBins];
 			var cc_window_threshold = new double[numBins];
-			double leading_edge_thresh = 0.5, view_period = 0.003, leading_edge_advance = 0.006, shutter_period = 1.2;
+			double leading_edge_thresh = 0.5, view_period = 0.003, shutter_period = 1.2; // leading_edge_advance = 0.006, 
 			int views_per_shutter = (int)(shutter_period / view_period);
 
 			Parallel.For(0, numBins, (k, state) =>
 			{
-				var temp = (Array)((Array)data.PartOf(new SliceIndex[] { new SliceIndex(k), null, null })).NanMean(1);
+				var temp = (Array)((Array)data.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }!)).NanMean(1);
 				temp = temp.Floor().Squeeze();
 				cc_window_all_means.SetValue(temp, new int?[] { k, null });
 				//var temp = (Array)cc_window_all_means.PartOf(new SliceIndex[] { new SliceIndex(k), null });
@@ -7387,7 +7387,7 @@ namespace AspireApp.Libraries
 				cc_window_threshold[k] = cc_window_max_mean[k] * leading_edge_thresh;
 			});
 
-			var vector = (double[])((Array)cc_window_all_means.PartOf(new SliceIndex[] { new SliceIndex(0), null }));
+			var vector = (double[])((Array)cc_window_all_means.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!));
 			var cc_window_start = vector.ToList().FindIndex(x => x > cc_window_threshold[0]);
 
 			vector = (double[])((Array)cc_window_all_means.PartOf(new SliceIndex[] { new SliceIndex(0), new SliceIndex(cc_window_start, null) }));
@@ -7398,7 +7398,7 @@ namespace AspireApp.Libraries
 			else
 				cc_window_end = views_per_shutter;
 
-			return (Array)data.PartOf(new SliceIndex[] { null, new SliceIndex(cc_window_start, cc_window_start + cc_window_end, null) });
+			return (Array)data.PartOf(new SliceIndex?[] { null, new SliceIndex(cc_window_start, cc_window_start + cc_window_end, null) }!);
 		}
 
 		/// <summary>
@@ -7433,9 +7433,9 @@ namespace AspireApp.Libraries
 		/// <param name="condition"></param>
 		/// <param name="isTrue"></param>
 		/// <returns></returns>
-		public static Array ReplaceIf(this Array array, Array toCompare, bool condition, object isTrue = null)
+		public static Array ReplaceIf(this Array array, Array toCompare, bool condition, object? isTrue = null)
 		{
-			Array result = null;
+			Array? result = null;
 
 			if (array != null && toCompare != null)
 			{
@@ -7462,7 +7462,7 @@ namespace AspireApp.Libraries
 					}
 				}
 			}
-			return result;
+			return result!;
 		}
 
 	}

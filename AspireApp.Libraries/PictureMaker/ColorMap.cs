@@ -27,7 +27,7 @@ namespace AspireApp.Libraries.PictureMaker
                         new SKColor(122, 209, 81),
                         new SKColor(253, 231, 37)
                 },
-                    null);
+                    new float[] { });
             }
         }
 

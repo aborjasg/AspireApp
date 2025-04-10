@@ -4,6 +4,7 @@ using AspireApp.ApiService.DataAccess;
 using AspireApp.Libraries;
 using AspireApp.Libraries.Models;
 using AspireApp.ServiceDefaults.Shared;
+using ConsoleApp;
 using IdentityModel.OidcClient;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;
@@ -74,5 +75,26 @@ Utils.EventLog("Information", $"Row Id={id} -> Serialized: {JsonConvert.Serializ
 */
 
 //var result = FakeData.GetLineChartData();
+
+// OptimizeServers [2025-04-08]
+/*
+var power = new List<int> { 1, 2, 3 }; // { 1, 4, 6, 3 }
+var cost = new List<int> { 1, 4, 2 }; // { 1, 2, 4, 3 }
+*/
+//Console.WriteLine($"OptimizeServers: Result={Functions.OptimizeServers(power, cost)}");
+
+// ParkingBill [2025-04-09]
+/*
+ParkingBill("10:00", "13:21") -> $17
+ParkingBill("09:42", "11:42") -> $9
+*/
+//Console.WriteLine($"ParkingBill: Result={Functions.ParkingBill("09:42", "11:42")}");
+
+
+// ParityDegree [2025-04-09]
+/*
+ParityDegree(24) -> 3
+*/
+Utils.EventLog("Information", $"ParityDegree: Result={Functions.ParityDegree(24)}");
 
 Utils.EventLog("Information", "End of Program");

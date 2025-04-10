@@ -17,6 +17,11 @@ namespace AspireApp.Libraries.PictureMaker
         /// <summary>
         /// 
         /// </summary>
+        public SKFont TextFont;        
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected double[][] AxisValues { get; set; }
 
         /// <summary>
@@ -25,6 +30,7 @@ namespace AspireApp.Libraries.PictureMaker
         public PlotBase()
         {
             AxisValues = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
+            TextFont = new SKFont {Size = 11.0f};
         }
 
         #region Protected/Private Methods
@@ -45,8 +51,8 @@ namespace AspireApp.Libraries.PictureMaker
         /// 
         /// </summary>
         protected void SetNoData(PlotTemplate plotTemplate, SKPoint point, SKSurface surface)
-        {
-            surface.Canvas.DrawText("N/A", new SKPoint(point.X + plotTemplate.FrameSize[0] / 2 - 20, point.Y - plotTemplate.FrameSize[1] / 2), Constants.PaintText);
+        {            
+            surface.Canvas.DrawText("N/A", new SKPoint(point.X + plotTemplate.FrameSize[0] / 2 - 20, point.Y - plotTemplate.FrameSize[1] / 2), this.TextFont, Constants.PaintText);
         }        
         /// <summary>
         /// 
@@ -157,7 +163,6 @@ namespace AspireApp.Libraries.PictureMaker
                             if (AxisValues[0][2] < 1) numDecimals = AxisValues[0][2] <= 0.25 ? "0.00" : "0.0";
 
                             // X Axis:
-                            paint.TextAlign = SKTextAlign.Center;
 
                             for (double k = AxisValues[0][0]; k <= AxisValues[0][1]; k += AxisValues[0][2])
                             {
@@ -165,11 +170,10 @@ namespace AspireApp.Libraries.PictureMaker
                                 var pointRef = new SKPoint(x, y);
 
                                 surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X, pointRef.Y + 5), Constants.PaintBorder);
-                                surface.Canvas.DrawText(k.ToString(numDecimals), new SKPoint(pointRef.X, pointRef.Y + 17), paint);
+                                surface.Canvas.DrawText(k.ToString(numDecimals), new SKPoint(pointRef.X, pointRef.Y + 17), SKTextAlign.Center, TextFont, paint);
                             }
 
-                            // Y Axis:
-                            paint.TextAlign = SKTextAlign.Right;
+                            // Y Axis:                            
 
                             for (int k = 0; k < Constants.Ticks.Length; k++)
                             {
@@ -177,7 +181,7 @@ namespace AspireApp.Libraries.PictureMaker
                                 var pointRef = new SKPoint(x, y);
 
                                 surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X - 5, pointRef.Y), Constants.PaintBorder);
-                                surface.Canvas.DrawText(Constants.Ticks[k].ToString(), new SKPoint(pointRef.X - 7, pointRef.Y + 3), paint);
+                                surface.Canvas.DrawText(Constants.Ticks[k].ToString(), new SKPoint(pointRef.X - 7, pointRef.Y + 3), SKTextAlign.Right, TextFont, paint);
                             }
 
                             break;
@@ -188,7 +192,6 @@ namespace AspireApp.Libraries.PictureMaker
                             if (AxisValues[0][2] < 1) numDecimals = AxisValues[0][2] <= 0.25 ? "0.00" : "0.0";
 
                             // X Axis:
-                            paint.TextAlign = SKTextAlign.Center;
 
                             for (double k = AxisValues[0][0]; k <= AxisValues[0][1]; k += AxisValues[0][2])
                             {
@@ -196,11 +199,10 @@ namespace AspireApp.Libraries.PictureMaker
                                 var pointRef = new SKPoint(x, y);
 
                                 surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X, pointRef.Y + 5), Constants.PaintBorder);
-                                surface.Canvas.DrawText(k.ToString(numDecimals), new SKPoint(pointRef.X, pointRef.Y + 17), paint);
+                                surface.Canvas.DrawText(k.ToString(numDecimals), new SKPoint(pointRef.X, pointRef.Y + 17), SKTextAlign.Center, TextFont, paint);
                             }
 
-                            // Y Axis:
-                            paint.TextAlign = SKTextAlign.Right;
+                            // Y Axis:                            
 
                             for (double k = AxisValues[1][0]; k <= AxisValues[1][1]; k += AxisValues[1][2])
                             {
@@ -208,7 +210,7 @@ namespace AspireApp.Libraries.PictureMaker
                                 var pointRef = new SKPoint(x, y);
 
                                 surface.Canvas.DrawLine(pointRef, new SKPoint(pointRef.X - 5, pointRef.Y), Constants.PaintBorder);
-                                surface.Canvas.DrawText(k.ToString(), new SKPoint(pointRef.X - 7, pointRef.Y + 3), paint);
+                                surface.Canvas.DrawText(k.ToString(), new SKPoint(pointRef.X - 7, pointRef.Y + 3), SKTextAlign.Right, TextFont, paint);
                             }
                             break;
                         }
@@ -269,13 +271,13 @@ namespace AspireApp.Libraries.PictureMaker
 
                 var paintBorder = new SKPaint
                 {
-                    TextSize = 11f,
+                    //TextSize = 11f,
                     IsAntialias = false,
                     Color = SKColors.Black,
                     IsStroke = false,
                     StrokeWidth = 1f,
                     Style = SKPaintStyle.Stroke,
-                    TextAlign = SKTextAlign.Right
+                    //TextAlign = SKTextAlign.Right
                 };
 
                 surface.Canvas.DrawRect(rcBar, paintBar);
@@ -333,11 +335,12 @@ namespace AspireApp.Libraries.PictureMaker
                         }
 
                         var rcMaxTextBound = new SKRect();
-                        paintBorder.MeasureText("-5", ref rcMaxTextBound);
+                        var font = TextFont;
+                        font.MeasureText("-5",  paintBorder); // paintBorder.MeasureText("-5", ref rcMaxTextBound);
                         foreach (var item in labels)
                         {
                             surface.Canvas.DrawLine(item.Value, new SKPoint(item.Value.X + 5, item.Value.Y), paintBorder);
-                            surface.Canvas.DrawText(item.Key, new SKPoint(item.Value.X + rcMaxTextBound.Width, item.Value.Y + rcMaxTextBound.Height / 2f - 2), Constants.PaintAxis);
+                            surface.Canvas.DrawText(item.Key, new SKPoint(item.Value.X + rcMaxTextBound.Width, item.Value.Y + rcMaxTextBound.Height / 2f - 2), TextFont, Constants.PaintAxis);
                         }
                     }
                 }
@@ -422,7 +425,7 @@ namespace AspireApp.Libraries.PictureMaker
                                                 color = ColorMap.GetColor((plotTemplate.Bar.Colors, plotTemplate.Bar.ColorPositions), (float)factor);
 
                                             var (px, py) = (col * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2, plotTemplate.FrameSize[1] - (row * plotTemplate.StrokeWidth + plotTemplate.StrokeWidth / 2));
-                                            canvas.DrawPoint(new SKPoint(pointRef.X + px, pointRef.Y - py), new SKPaint { Color = color, FilterQuality = SKFilterQuality.High, Style = SKPaintStyle.Fill, StrokeWidth = plotTemplate.StrokeWidth });
+                                            canvas.DrawPoint(new SKPoint(pointRef.X + px, pointRef.Y - py), new SKPaint { Color = color, Style = SKPaintStyle.Fill, StrokeWidth = plotTemplate.StrokeWidth });
                                         }
                                     }
                                 }
@@ -434,7 +437,7 @@ namespace AspireApp.Libraries.PictureMaker
                                 SKPoint pointRef = new SKPoint(x, y);
                                 var color = SKColors.Black;
                                 var arrayData = (double[,])plotItem.ArrayData!;
-                                var paintPoint = new SKPaint { IsAntialias = false, FilterQuality = SKFilterQuality.High, Style = SKPaintStyle.Fill, StrokeWidth = plotTemplate.StrokeWidth, TextSize = 10 };
+                                var paintPoint = new SKPaint { IsAntialias = false, Style = SKPaintStyle.Fill, StrokeWidth = plotTemplate.StrokeWidth };
                                 plotItem.Title = $"D{plotItem.IndexRef[0] + 1}";
 
                                 if (plotTemplate.Bar != null)
@@ -482,7 +485,7 @@ namespace AspireApp.Libraries.PictureMaker
                                 // Preparing plot:
                                 float px, py0, py1;
                                 SKColor color = new SKColor(31, 119, 180);
-                                var paintPoint = new SKPaint { Color = color, FilterQuality = SKFilterQuality.High, StrokeWidth = plotTemplate.StrokeWidth };
+                                var paintPoint = new SKPaint { Color = color, StrokeWidth = plotTemplate.StrokeWidth };
                                 var arrX = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(0), null }!);
                                 var arrY = (double[])plotItem.ArrayData!.PartOf(new SliceIndex?[] { new SliceIndex(1), null }!);
 
@@ -543,7 +546,7 @@ namespace AspireApp.Libraries.PictureMaker
                                 // Preparing plot:
                                 float px, py0, py1;
                                 SKColor color = SKColors.Green;
-                                var paintPoint = new SKPaint { Color = color, FilterQuality = SKFilterQuality.High, StrokeWidth = plotTemplate.StrokeWidth };
+                                var paintPoint = new SKPaint { Color = color, StrokeWidth = plotTemplate.StrokeWidth };
 
                                 foreach (var elem in dict.OrderBy(x => x.Key))
                                 {
@@ -592,7 +595,7 @@ namespace AspireApp.Libraries.PictureMaker
 
                                 // Y Axis:
                                 SKColor color = new SKColor(31, 119, 180);
-                                var paintPoint = new SKPaint { Color = color, FilterQuality = SKFilterQuality.High, StrokeWidth = plotTemplate.StrokeWidth };
+                                var paintPoint = new SKPaint { Color = color, StrokeWidth = plotTemplate.StrokeWidth };
                                 var pointRef = new SKPoint(point.X, point.Y + plotTemplate.FrameSize[1]);
                                 double x, y;
                                 float px, py0, py1;
@@ -659,12 +662,12 @@ namespace AspireApp.Libraries.PictureMaker
                             {
                                 AxisValues = new double[][] { Array.Empty<double>(), Array.Empty<double>() };
                                 List<double> listMinX = new List<double>(), listMaxX = new List<double>(), listMinY = new List<double>(), listMaxY = new List<double>();
-                                int jumps = 6, numBins = 6, numThresh = plotItem.ArrayData.GetLength(1), threshStart = 30, threshEnd = numThresh + threshStart - 1, threshStep = 1, windowLength = 17, polyOrder = 3;
+                                int jumps = 6, numBins = 6, numThresh = plotItem.ArrayData.GetLength(1), threshStart = 30, threshEnd = numThresh + threshStart - 1, threshStep = 1; // windowLength = 17, polyOrder = 3;
                                 var binThreshList = ArrayExtensions.GetBinThreshList(numBins, threshStart, threshEnd, threshStep, numThresh);
                                 
                                 for (int k=0; k< numThresh; k++)
                                 {
-                                    var arrX = (int[])binThreshList.PartOf(new object?[] { new SliceIndex(k), null });
+                                    var arrX = (int[])binThreshList!.PartOf(new SliceIndex?[] { new SliceIndex(k), null }!);
                                     if (arrX != null)
                                     {
                                         var (minValue, maxValue) = DataTransformation.GetLimits(arrX);
@@ -676,7 +679,7 @@ namespace AspireApp.Libraries.PictureMaker
                                         throw new Exception("arrX empty");
                                     }
 
-                                    var arrY = (double[])plotItem.ArrayData.PartOf(new SliceIndex?[] { new SliceIndex(k), null });
+                                    var arrY = (double[])plotItem.ArrayData.PartOf(new SliceIndex?[] { new SliceIndex(k), null }!);
 
                                     if (arrY != null)
                                     {
@@ -707,13 +710,13 @@ namespace AspireApp.Libraries.PictureMaker
                                     StrokeJoin = SKStrokeJoin.Miter,
                                     StrokeWidth = plotTemplate.StrokeWidth,
                                     Style = SKPaintStyle.Stroke,
-                                    TextAlign = SKTextAlign.Center,
-                                    TextSize = 20f,
+                                    //TextAlign = SKTextAlign.Center,
+                                    //TextSize = 20f,
                                 };
 
                                 for (int j=0; j< plotItem.ArrayData.GetLength(0); j++)
                                 {
-                                    var arrY = (double[])plotItem.ArrayData.PartOf(new SliceIndex?[] { new SliceIndex(j), null });
+                                    var arrY = (double[])plotItem.ArrayData.PartOf(new SliceIndex?[] { new SliceIndex(j), null }!);
                                     List<SKPoint> points = new List<SKPoint>();
 
                                     // Paint:
@@ -800,7 +803,7 @@ namespace AspireApp.Libraries.PictureMaker
         public void DrawPlotTitle(PlotTemplate plotTemplate, SKPoint point, SKSurface surface, PlotItem plotItem, string addToTitle = "")
         {            
             if(plotTemplate.IsTitleVisible)
-                surface.Canvas.DrawText(plotItem.Title + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, Constants.PaintTitle);
+                surface.Canvas.DrawText(plotItem.Title + addToTitle, point.X + plotTemplate.FrameSize[0] / 2f, point.Y - plotTemplate.FrameSize[1] - 5, TextFont, Constants.PaintTitle);
         }
         /// <summary>
         /// 

@@ -138,7 +138,8 @@ namespace AspireApp.Libraries.PictureMaker
         /// </summary>
         public void DrawPictureTitle()
         {
-            Surface.Canvas.DrawText(pictureTemplate.Name, pictureTemplate.PictureDimensions[0] / 2f, pictureTemplate.StartPoint[1] - 20, Constants.PaintTitle);
+            var textFont = new SKFont {Size = 11.0f};
+            Surface.Canvas.DrawText(pictureTemplate.Name, pictureTemplate.PictureDimensions[0] / 2f, pictureTemplate.StartPoint[1] - 20, SKTextAlign.Center, textFont, Constants.PaintTitle);
         }
 
         /// <summary>

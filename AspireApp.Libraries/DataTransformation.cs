@@ -74,9 +74,9 @@ namespace AspireApp.Libraries
 
 			for (int k = 0; k < polyCoeffs.GetLength(0); k++)
 			{
-				var coeffs = (Array)polyCoeffs.PartOf(new SliceIndex?[] { new SliceIndex(k), null });
+				var coeffs = (Array)polyCoeffs.PartOf(new SliceIndex?[] { new SliceIndex(k), null }!);
 				for (int p = 0; p < indexesInterp.Length; p++)
-					result.SetValue(((Array)result.PartOf(new SliceIndex?[] { new SliceIndex(p), null })).Multip(indexesInterp[p]).Sum(coeffs), new int?[] { p, null });
+					result.SetValue(((Array)result.PartOf(new SliceIndex?[] { new SliceIndex(p), null }!)).Multip(indexesInterp[p]).Sum(coeffs), new int?[] { p, null });
 			}
 			return result;
 		}
@@ -314,7 +314,7 @@ namespace AspireApp.Libraries
 		public static void FitEdge(Array x, ref Array y, int windowStart, int windowStop, int interpStart, int interpStop, int polyorder, int axis, int deriv, double delta)
 		{
 			var result = new double[0];
-			var x_edge = (Array)x.PartOf(new SliceIndex?[] { new SliceIndex(windowStart, windowStop), null, null });
+			var x_edge = (Array)x.PartOf(new SliceIndex?[] { new SliceIndex(windowStart, windowStop), null, null }!);
 			bool swapped = false;
 
 			// Axis
@@ -346,7 +346,7 @@ namespace AspireApp.Libraries
 			if (swapped && axis > 0) values = values.SwapAxes(0, axis);
 
 			for (int k = 0; k < interpStop - interpStart; k++)
-				y.SetValue((Array)values.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }), new int?[] { interpStart + k, null, null });
+				y.SetValue((Array)values.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }!), new int?[] { interpStart + k, null, null });
 
 		}
 
@@ -387,7 +387,7 @@ namespace AspireApp.Libraries
 
 			for (int k = 0; k < lhs.GetLength(0); k++)
 			{
-				var temp = ((double[])lhs.PartOf(new SliceIndex?[] { new SliceIndex(k), null })).Revert1D();
+				var temp = ((double[])lhs.PartOf(new SliceIndex?[] { new SliceIndex(k), null }!)).Revert1D();
 				lhs.SetValue(MultiplyAccumulate(temp).Revert1D(), new int?[] { k, null });
 			}
 
@@ -400,7 +400,7 @@ namespace AspireApp.Libraries
 
 			for (int k = 0; k < coeffs.GetLength(1); k++)
 			{
-				var c = LeastSquares((double[,])lhsDiv, (double[])rhs.PartOf(new SliceIndex?[] { null, new SliceIndex(k) }));
+				var c = LeastSquares((double[,])lhsDiv, (double[])rhs.PartOf(new SliceIndex?[] { null, new SliceIndex(k) }!));
 				coeffs.SetValue(c, new int?[] { null, k });
 			}
 
@@ -444,9 +444,8 @@ namespace AspireApp.Libraries
 		public static double[] LeastSquares(double[,] a, double[] b)
 		{
 			var result = new double[0];
-			int info;
+			//int info;
 			alglib.lsfitreport rep;
-
 			alglib.lsfitlinear(b, a, out result, out rep);
 			return result;
 		}
@@ -461,7 +460,7 @@ namespace AspireApp.Libraries
 		{
 			for (int k = 0; k < data.GetLength(1); k++)
 			{
-				var c = LeastSquares(a, (double[])b.PartOf(new SliceIndex?[] { null, new SliceIndex(k) }));
+				var c = LeastSquares(a, (double[])b.PartOf(new SliceIndex?[] { null, new SliceIndex(k) }!));
 				data.SetValue(c, new int?[] { null, k });
 			}
 		}
@@ -1024,7 +1023,7 @@ namespace AspireApp.Libraries
             var voltageIndex = TUBE_SPECTRA_VOLTAGES.FindIndex(x => x == voltage);
             if (voltageIndex > 0)
             {
-				var temp = (Array)TUBE_SPECTRA.PartOf(new SliceIndex?[] { new SliceIndex(voltageIndex), null });
+				var temp = (Array)TUBE_SPECTRA.PartOf(new SliceIndex?[] { new SliceIndex(voltageIndex), null }!);
 				var spectrum = ((Array)CU_1MM_ATTEN_SPECTRUM).Multip(-1 * thickness).Exp();
 				spectrum = temp.Multip(spectrum);
 				var result = (double)spectrum.NanSum() * Math.Pow(1 / (distance / 100), 2) * time * current * pixelArea;
@@ -1153,7 +1152,7 @@ namespace AspireApp.Libraries
         public static string GetJsonValuebyKey(string content, string path)
         {
             string result = "";
-            Dictionary<string, dynamic> objNode = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(content);
+            Dictionary<string, dynamic> objNode = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(content)!;
             var nodes = path.Split('.').ToList();
 
             if (objNode != null && nodes.Count > 0)
@@ -1260,7 +1259,7 @@ namespace AspireApp.Libraries
         /// <returns></returns>
         public static Array AccumulateFrames(Array array, int factor)
         {
-            Array result = null;
+            Array? result = null;
             var maxlen = System.Convert.ToInt16(array.GetLength(0) / factor) * factor;
 
             var old_shape = array.GetDimensions().ToList();
@@ -1269,7 +1268,7 @@ namespace AspireApp.Libraries
             new_shape.AddRange(old_shape);
 
             if (maxlen != array.GetLength(0))
-                result = (Array)array.PartOf(new SliceIndex[] { new SliceIndex(0, maxlen), null, null, null });
+                result = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(0, maxlen), null, null, null }!);
             else
                 result = array;
 
@@ -1303,7 +1302,7 @@ namespace AspireApp.Libraries
             {
                 for (int k = 0; k < num_repeats; k++)
                 {
-                    var temp = (Array)array.PartOf(new SliceIndex[] { new SliceIndex(k * views_per_repeat, (k + 1) * views_per_repeat), null, null });
+                    var temp = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(k * views_per_repeat, (k + 1) * views_per_repeat), null, null }!);
                     windows.SetValue(temp, new int?[] { k, null, null, null });
                 }
                 windows = (Array)windows.NanMean(0);
@@ -1311,15 +1310,15 @@ namespace AspireApp.Libraries
                 var median = (Array)windows.NanMedian(new int[] { 1, 2 });
                 var start = (int)(median.IsGreaterThan(window_threshold * (double)median.NanMax(), false)).ArgMax() + window_offset;
 
-                windows = (Array)windows.PartOf(new SliceIndex[] { new SliceIndex(start, start + window), null, null });
-                median = (Array)median.PartOf(new SliceIndex[] { new SliceIndex(start, start + window) });
+                windows = (Array)windows.PartOf(new SliceIndex?[] { new SliceIndex(start, start + window), null, null }!);
+                median = (Array)median.PartOf(new SliceIndex?[] { new SliceIndex(start, start + window) }!);
                 var mean = median.NanMean(0);
                 var normalized = windows.Multip(mean).Div(median.AddDimension<double>(true).AddDimension<double>(true));
 
                 mean = normalized.NanMean(0);
-                var mean_w1 = (Array)((Array)normalized.PartOf(new SliceIndex[] { new SliceIndex(null, d_window), null, null })).NanMean(0);
-                var mean_w2 = (Array)((Array)normalized.PartOf(new SliceIndex[] { new SliceIndex((window / 2 - d_window / 2), (window / 2 + d_window / 2)), null, null })).NanMean(0);
-                var mean_w3 = (Array)((Array)normalized.PartOf(new SliceIndex[] { new SliceIndex(normalized.GetLength(0) - d_window, normalized.GetLength(0)), null, null })).NanMean(0);
+                var mean_w1 = (Array)((Array)normalized.PartOf(new SliceIndex?[] { new SliceIndex(null, d_window), null, null }!)).NanMean(0);
+                var mean_w2 = (Array)((Array)normalized.PartOf(new SliceIndex?[] { new SliceIndex((window / 2 - d_window / 2), (window / 2 + d_window / 2)), null, null }!)).NanMean(0);
+                var mean_w3 = (Array)((Array)normalized.PartOf(new SliceIndex?[] { new SliceIndex(normalized.GetLength(0) - d_window, normalized.GetLength(0)), null, null }!)).NanMean(0);
 
 
                 d_number.SetValue((mean_w1.Sub(mean_w2)), new int?[] { 0, null, null });
@@ -1342,13 +1341,13 @@ namespace AspireApp.Libraries
         public static Array MaxDeviation(Array array, int axis = -1)
         {
             var arrMean = (Array)array.NanMean(axis);
-            var result = Array.CreateInstance(array.GetType().GetElementType(), array.GetDimensions());
+            var result = Array.CreateInstance(array.GetType().GetElementType()!, array.GetDimensions());
 
             //result = array.Sub(arrMean);
             //for (int k=0; k<array.GetLength(1); k++)
             Parallel.For(0, array.GetLength(1), k =>
             {
-                var temp = (Array)array.PartOf(new SliceIndex[] { null, new SliceIndex(k), null, null });
+                var temp = (Array)array.PartOf(new SliceIndex?[] { null, new SliceIndex(k), null, null }!);
                 temp = temp.Sub(arrMean);
                 result.SetValue(temp, new int?[] { null, k, null, null });
             });
@@ -1372,12 +1371,12 @@ namespace AspireApp.Libraries
             var newDims = array.GetDimensions().ToArray();
             newDims[axis]++;
 
-            var newArray = Array.CreateInstance(array.GetType().GetElementType(), newDims);
+            var newArray = Array.CreateInstance(array.GetType().GetElementType()!, newDims);
             var cumsum = (Array)array.NanCumSum(axis);
             cumsum = cumsum.MoveAxis(axis, 0);
 
-            var temp1 = (Array)cumsum.PartOf(new SliceIndex[] { new SliceIndex(n, null), null, null, null });
-            var temp2 = (Array)cumsum.PartOf(new SliceIndex[] { new SliceIndex(null, cumsum.GetLength(0) - n), null, null, null });
+            var temp1 = (Array)cumsum.PartOf(new SliceIndex?[] { new SliceIndex(n, null), null, null, null }!);
+            var temp2 = (Array)cumsum.PartOf(new SliceIndex?[] { new SliceIndex(null, cumsum.GetLength(0) - n), null, null, null }!);
             var mean = temp1.Sub(temp2).Div(n);
             var result = mean.MoveAxis(0, axis);
 
@@ -1401,13 +1400,13 @@ namespace AspireApp.Libraries
             //for (int k = 0; k < numBins; k++)
             Parallel.For(0, numBins, k =>
             {
-                var temp = (Array)norm_mask_mean.PartOf(new SliceIndex[] { new SliceIndex(k), null, null });
+                var temp = (Array)norm_mask_mean.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }!);
                 var temp1 = temp.Boolean_IsGreaterThan(norm_mask_median[k] * (1 - norm_mask_range));
                 var temp2 = temp.Boolean_IsLesserThan(norm_mask_median[k] * (1 + norm_mask_range));
                 var temp3 = ArrayExtensions.Logical_And(temp1, temp2);
                 norm_mask.SetValue(temp3, new int?[] { k, null, null });
 
-                var temp4 = (Array)array.PartOf(new SliceIndex[] { new SliceIndex(k), null, null, null });
+                var temp4 = (Array)array.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null, null }!);
                 temp4 = (Array)temp4.Transpose(new int[] { 1, 2, 0 });
                 temp4 = temp4.Visible(temp3);
                 temp4 = (Array)temp4.NanMean(0);
@@ -1419,7 +1418,7 @@ namespace AspireApp.Libraries
             //for (int k = 0; k < numBins; k++)
             Parallel.For(0, numBins, k =>
             {
-                var temp5 = ((Array)norm.PartOf(new SliceIndex[] { new SliceIndex(k), null })).Div(arrMean[k]);
+                var temp5 = ((Array)norm.PartOf(new SliceIndex?[] { new SliceIndex(k), null }!)).Div(arrMean[k]);
                 norm.SetValue(temp5, new int?[] { k, null });
             });
 
@@ -1443,11 +1442,11 @@ namespace AspireApp.Libraries
             var numViews = array.GetLength(1);
             double sample_period = 0.025400000000000002, STABILITY_NORMALIZATION_RANGE = 0.2;
 
-            var sumcc = (Array)((Array)array.PartOf(new SliceIndex[] { new SliceIndex(1, null), null, null })).NanSum(axis);
+            var sumcc = (Array)((Array)array.PartOf(new SliceIndex?[] { new SliceIndex(1, null), null, null }!)).NanSum(axis);
             var sumcc_median = (Array)sumcc.NanMedian(new int[] { 1, 2 });
             var start = (int)(sumcc_median.IsGreaterThan(0.9 * (double)sumcc_median.NanMax(), false)).ArgMax() + (int)(10 / sample_period);
             var end = start + (int)(60 / sample_period);
-            var temp = (Array)cc_open.PartOf(new SliceIndex[] { null, new SliceIndex(start, end), null, null });
+            var temp = (Array)cc_open.PartOf(new SliceIndex?[] { null, new SliceIndex(start, end), null, null }!);
             var (norm, norm_mask) = NormalizeArray(temp, STABILITY_NORMALIZATION_RANGE);
 
             var cc_norm = Array.CreateInstance(typeof(double), temp.GetDimensions());
@@ -1458,7 +1457,7 @@ namespace AspireApp.Libraries
             {
                 for (int i = 0; i < norm.GetLength(1); i++)
                 {
-                    var temp1 = (Array)temp.PartOf(new SliceIndex[] { new SliceIndex(j), new SliceIndex(i), null, null });
+                    var temp1 = (Array)temp.PartOf(new SliceIndex?[] { new SliceIndex(j), new SliceIndex(i), null, null }!);
                     cc_norm.SetValue(temp1.Div(mNorm[j, i]), new int?[] { j, i, null, null });
                 }
             });
@@ -1488,10 +1487,10 @@ namespace AspireApp.Libraries
             //for (int k = 0; k < numBins; k++)
             Parallel.For(0, numBins, k =>
             {
-                var temp1 = (Array)md1f.PartOf(new SliceIndex[] { new SliceIndex(k), null, null });
+                var temp1 = (Array)md1f.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }!);
                 md1f_ncps.SetValue(temp1.Boolean_IsGreaterThan(STABILITY_MD1F_THRESHOLD[k]), new int?[] { k, null, null });
 
-                var temp2 = (Array)md1s.PartOf(new SliceIndex[] { new SliceIndex(k), null, null });
+                var temp2 = (Array)md1s.PartOf(new SliceIndex?[] { new SliceIndex(k), null, null }!);
                 md1s_ncps.SetValue(temp2.Boolean_IsGreaterThan(STABILITY_MD1S_THRESHOLD[k]), new int?[] { k, null, null });
             });
             return (md1f, md1s, md1f_ncps, md1s_ncps);

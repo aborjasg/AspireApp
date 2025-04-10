@@ -41,7 +41,7 @@ builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<ConnectionString>(sp =>
 {
-    return  new ConnectionString() { FATCloud_Visualization = builder.Configuration["ConnectionString:FATCloud_Visualization"]! }; 
+    return  new ConnectionString() { PictureMaker_Visualization = builder.Configuration["ConnectionString:PictureMaker_Visualization"]!}; 
 });
 
 //builder.Services.AddOpenIddict()
@@ -234,7 +234,7 @@ app.MapPost("/saveRunImage", (ConnectionString connectionString, RunImage record
     var result = new ActionResponse();
     try
     {
-        var obj = new TableAccess<RunImage>(connectionString.FATCloud_Visualization);
+        var obj = new TableAccess<RunImage>(connectionString.PictureMaker_Visualization);
         result.Id = obj.SaveRow(record);
         result.Message = "Saved successfully";
     }
@@ -253,7 +253,7 @@ app.MapGet("/getRunImage/{id}", (ConnectionString connectionString, int id) =>
     var record = new RunImage();
     try
     {
-        var obj = new TableAccess<RunImage>(connectionString.FATCloud_Visualization);
+        var obj = new TableAccess<RunImage>(connectionString.PictureMaker_Visualization);
               var temp = obj.GetRow(id);
         if (temp is not null)
             record = temp;

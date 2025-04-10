@@ -108,7 +108,7 @@ namespace AspireApp.Libraries.DataSource
 
         public PictureTemplate GetPictureTemplate() { return pictureTemplate; }
 
-        public new Dictionary<enmDerivedData, Array> GetDerivedDataFromFile(enmTestType testType, Array arrData)
+        public  Dictionary<enmDerivedData, Array> GetDerivedDataFromFile(enmTestType testType, Array arrData)
         {
             var result = new Dictionary<enmDerivedData, Array>();
             try
@@ -121,7 +121,7 @@ namespace AspireApp.Libraries.DataSource
                             {
                                 Console.WriteLine($"StabilityTest -> Starting ProcessSource()...");
                                 if (arrData.GetLength(0) == 13)
-                                    arrData = (Array)arrData.PartOf(new SliceIndex[] { new SliceIndex(6, 12), null, null, null });
+                                    arrData = (Array)arrData.PartOf(new SliceIndex?[] { new SliceIndex(6, 12), null, null, null }!);
 
                                 var numBins = arrData.GetLength(0);
                                 var numViews = arrData.GetLength(1);
@@ -139,7 +139,7 @@ namespace AspireApp.Libraries.DataSource
                                 var cc_data_resampled = DataTransformation.AccumulateFrames(temp, resampling_factor);
                                 cc_data_resampled = cc_data_resampled.MoveAxis(0, 1);
 
-                                var sumcc_resampled = (Array)((Array)cc_data_resampled.PartOf(new SliceIndex[] { new SliceIndex(1, null), null, null, null })).NanSum(0);
+                                var sumcc_resampled = (Array)((Array)cc_data_resampled.PartOf(new SliceIndex?[] { new SliceIndex(1, null), null, null, null }!)).NanSum(0);
                                 var views_per_repeat = (int)(numViews / num_repeats / resampling_factor);
                                 var ncp_threshold = Constants.D_NUMBER_NCP_THRESHOLDS;
 
