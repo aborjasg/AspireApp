@@ -29,6 +29,62 @@ Console.WriteLine("Hello, World!");
 Utils.EventLog("Information", "Start Program...");
 
 /*
+            string s="aba";
+            long n = 10;
+            long r = repeatedString(s, n);            
+
+            Console.WriteLine("string: {0}, n={1} -> Result={2}", s, n, r);
+            */
+/*
+System.IO.StreamReader file = new System.IO.StreamReader(@"C:\ABorjas\Documents\HackerRank-C#\Source.txt");  
+string p = file.ReadLine();
+//string p = "bababa";
+string v = file.ReadLine();
+virusIndices(p, v);
+*/
+/*
+int[] arr = {256741038, 623958417, 467905213, 714532089, 938071625};
+miniMaxSum(arr);
+*/
+/*
+string str = "!m-rB`-oN!.W`cLAcVbN/CqSoolII!SImji.!w/`Xu`uZa1TWPRq`uRBtok`xPT`lL-zPTc.BSRIhu..-!.!tcl!-U";
+//string str = "www.abc.xy"; // OOK
+int k = 62;
+Console.WriteLine("{0}", caesarCipher(str, k));
+*/
+
+/*
+System.IO.StreamReader file = new System.IO.StreamReader(@"files\migratoryBirds.txt");  
+string n = file.ReadLine();
+string str = file.ReadLine();
+List<int> arr = str.Split(' ').Select(int.Parse).ToList();
+Console.WriteLine("res = {0}", migratoryBirds(arr));
+*/
+
+/*
+int year = 2016;
+Console.WriteLine("date: {0}", dayOfProgrammer(year));
+*/
+
+/*
+System.IO.StreamReader file = new System.IO.StreamReader(@"files\FrequencyQueries.txt");  
+
+List<List<int>> queries = new List<List<int>>();
+var q = file.ReadLine().ToString();
+Console.WriteLine("q={0}", q);
+
+string line = "";
+
+while ((line = file.ReadLine()) != null) {
+    queries.Add(line.TrimEnd().Split(' ').ToList().Select(queriesTemp => Convert.ToInt32(queriesTemp)).ToList());
+}
+
+List<int> ans = freqQuery(queries);
+Console.WriteLine("{0}", string.Join("", ans));
+Console.WriteLine("Count: {0}, Count(1):{1}", ans.Count, ans.Count(x => x == 1)); // 33246, 4918 (!)
+*/
+
+/*
 string connectionString = ConfigurationManager.AppSettings.Get("ConnectionString.NpgsqlConnection")!;
 var obj = new TableAccess<RunImage>(connectionString);
 
