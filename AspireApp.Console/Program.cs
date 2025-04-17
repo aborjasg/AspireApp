@@ -151,6 +151,8 @@ ParkingBill("09:42", "11:42") -> $9
 /*
 ParityDegree(24) -> 3
 */
-Utils.EventLog("Information", $"ParityDegree: Result={Functions.ParityDegree(24)}");
+//Utils.EventLog("Information", $"ParityDegree: Result={Functions.ParityDegree(24)}");
+
+
 
 Utils.EventLog("Information", "End of Program");

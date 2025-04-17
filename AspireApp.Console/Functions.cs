@@ -402,7 +402,7 @@ namespace ConsoleApp
             return res;
         }
 
-        public static List<int> climbingLeaderboard(List<int> ranked, List<int> player)
+           static List<int> climbingLeaderboard(List<int> ranked, List<int> player)
         {
             var shortcut = new Dictionary<int, int>();
             var ranked1 = ranked.Distinct().ToList();
@@ -578,5 +578,7 @@ namespace ConsoleApp
             }
             return result;
         }
+
+
     }
 }
