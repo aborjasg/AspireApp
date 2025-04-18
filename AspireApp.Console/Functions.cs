@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace ConsoleApp
@@ -402,7 +405,7 @@ namespace ConsoleApp
             return res;
         }
 
-           static List<int> climbingLeaderboard(List<int> ranked, List<int> player)
+        static List<int> climbingLeaderboard(List<int> ranked, List<int> player)
         {
             var shortcut = new Dictionary<int, int>();
             var ranked1 = ranked.Distinct().ToList();
@@ -579,6 +582,31 @@ namespace ConsoleApp
             return result;
         }
 
+        public static void TransformJson(ref JsonNode node)
+        {
+            //Console.WriteLine($"node:{node}");
+            var temp = JsonNode.Parse(node.ToJsonString())!.AsObject();
+           if (temp is JsonObject jsonObject)
+            {
+                foreach (var item in jsonObject)
+                {
+                    if (item.Value is JsonValue)
+                    {
+                        if (item.Value.ToString() == "N/A" && jsonObject.ContainsKey(item.Key))
+                        {
+                            ((JsonObject)node).Remove(item.Key);
+                            Console.WriteLine($"Removed: {item.Key}");
+                        }
+                    }
+                    else if (item.Value is JsonObject)
+                    {
+                        JsonNode jsonNode = JsonNode.Parse(JsonSerializer.Serialize(item.Value))!;
+                        TransformJson(ref jsonNode);
+                        node[item.Key] = jsonNode;
+                    }
+                }
+            }
+        }
 
     }
 }

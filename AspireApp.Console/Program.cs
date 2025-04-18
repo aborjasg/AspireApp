@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Nodes;
 
 /*
 var appSettings = @"C:\Redlen\github\AspireApp\AspireApp.ApiService\PlotTemplates.json";
@@ -153,6 +154,13 @@ ParityDegree(24) -> 3
 */
 //Utils.EventLog("Information", $"ParityDegree: Result={Functions.ParityDegree(24)}");
 
-
+// 
+//HttpClient client = new HttpClient();
+//string s = await client.GetStringAsync("https://coderbyte.com/api/challenges/json/json-cleaning");
+string s = "{\r\n\t\"name\": {\r\n\t\t\"first\": \"Robert\",\r\n\t\t\"middle\": \"\",\r\n\t\t\"last\": \"Smith\"\r\n\t},\r\n\t\"age\": 25,\r\n\t\"DOB\": \"-\",\r\n\t\"hobbies\": [\r\n\t\t\"running\",\r\n\t\t\"coding\",\r\n\t\t\"-\"\r\n\t],\r\n\t\"education\": {\r\n\t\t\"highschool\": \"N/A\",\r\n\t\t\"college\": \"Yale\"\r\n\t}\r\n}";
+var node = JsonNode.Parse(s)!;
+Utils.EventLog("Information", $"Before: {node}");
+Functions.TransformJson(ref node);
+Utils.EventLog("Information", $"After: {node}");
 
 Utils.EventLog("Information", "End of Program");
